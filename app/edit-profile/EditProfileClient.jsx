@@ -211,9 +211,12 @@ export default function EditProfile() {
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-    supabase.from('users').upsert(saved).then(({ error }) => {
-      if (error) console.error('Save error:', error.message);
-    });
+    const { error } = await supabase.from('users').upsert(saved);
+    if (error) {
+      setSaveError(error.message);
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     router.push(`/profile/${user.id}`);
   };
@@ -336,6 +339,7 @@ export default function EditProfile() {
           <label>Hourly Rate (USD)<input type="number" min="1" placeholder="e.g. 150" value={form.hourly_rate} onChange={e => set('hourly_rate', e.target.value)} required /></label>
         )}
 
+        {saveError && <p className="resume-import__error">{saveError}</p>}
         <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
       </form>
 
