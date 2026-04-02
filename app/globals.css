@@ -41,10 +41,11 @@
   --clay:  #B85C38;
   --dusk:  #8B95C9;
 
-  --font-display: 'Reddit Sans', system-ui, sans-serif;
-  --font-body:    'Inter', system-ui, sans-serif;
-  --font-serif:   'Fraunces', Georgia, serif;
-  --font-mono:    'DM Mono', 'SFMono-Regular', monospace;
+  --font-display: 'Arial', 'Helvetica', system-ui, sans-serif;
+  --font-body:    'Arial', 'Helvetica', system-ui, sans-serif;
+  --font-serif:   'Arial', system-ui, sans-serif;
+  --font-mono:    'Courier New', 'Courier', monospace;
+  --font-vt323:   var(--font-vt323, 'Courier New', monospace);
 
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
@@ -82,11 +83,13 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
-  background-color: var(--white);
-  color: var(--black);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  /* Win2k classic teal desktop */
+  background-color: #008080;
+  color: #000000;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  image-rendering: pixelated;
   overflow-x: hidden;
 }
 
@@ -94,10 +97,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* The "page content" sits as a Win2k window on the teal desktop */
+  background: #008080;
 }
 
 .page-content {
   flex: 1;
+  background: #d4d0c8;
 }
 
 a {
@@ -112,68 +118,100 @@ button {
   background: none;
 }
 
-/* ─── Shared button styles ─────────────────────────── */
+/* ─── Shared button styles (Win2k) ─────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 20px;
-  border-radius: var(--radius-full);
-  font-size: var(--text-sm);
-  font-weight: 600;
+  padding: 6px 18px;
+  border-radius: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s;
+  transition: none;
   text-decoration: none;
-  border: none;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  background: #d4d0c8;
+  color: #000;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #404040;
 }
-.btn:hover  { opacity: 0.85; }
-.btn:active { transform: scale(0.97); }
+.btn:hover  { background: #c8c4bc; }
+.btn:active {
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-bottom: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
+  box-shadow: inset 1px 1px 0 #404040;
+}
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn--primary   { background: var(--blue); color: #fff; }
-.btn--secondary { background: var(--gray-light); color: var(--black); }
-.btn--ghost     { background: transparent; border: 1.5px solid var(--neutral-300); color: var(--black); }
-.btn--sm        { padding: 6px 14px; font-size: var(--text-xs); }
+.btn--primary   { outline: 1px solid #000080; background: #d4d0c8; color: #000; }
+.btn--secondary { background: #d4d0c8; color: #000; }
+.btn--ghost     { background: #d4d0c8; color: #000; }
+.btn--sm        { padding: 3px 10px; font-size: 0.72rem; }
 
-/* ─── Bubble links ──────────────────────────────────── */
+/* ─── Bubble links (Win2k toolbar buttons) ──────────── */
 .bubble {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 22px;
-  border-radius: var(--radius-full);
-  font-size: var(--text-sm);
-  font-weight: 600;
+  gap: 6px;
+  padding: 6px 18px;
+  border-radius: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
-  color: var(--blue);
-  border: 1.5px solid var(--blue);
-  transition: background 0.15s, color 0.15s;
+  color: #000;
+  background: #d4d0c8;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #404040;
+  outline: 1px solid #404040;
   text-decoration: none;
-  background: none;
   position: relative;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  transition: none;
 }
-.bubble:hover { background: var(--blue-50); }
+.bubble:hover {
+  background: #c8c4bc;
+  color: #000;
+}
+.bubble:active {
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-bottom: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
+  box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #dfdfdf;
+}
 .bubble--badge { position: relative; }
 .bubble-badge {
   position: absolute;
-  top: -6px; right: -6px;
-  min-width: 18px; height: 18px;
-  border-radius: 9px;
-  font-size: 11px;
+  top: -7px; right: -8px;
+  min-width: 15px; height: 15px;
+  border-radius: 0;
+  font-size: 0.55rem;
   font-weight: 700;
   color: #fff;
   display: flex; align-items: center; justify-content: center;
-  padding: 0 4px;
+  padding: 0 3px;
+  border: 1px solid #000080;
 }
 .bubble--profile {
-  border: 1.5px solid currentColor;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
 }
 .bubble--delete {
-  color: var(--clay);
-  border-color: var(--clay);
+  color: #8b0000;
 }
-.bubble--delete:hover { background: #fdf2ee; }
+.bubble--delete:hover { background: #ffe8e8; }
 
 /* ─── Badges ─────────────────────────────────────────── */
 .badge {
