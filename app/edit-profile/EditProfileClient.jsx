@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import { bustProfileCache, useAuth } from '@/context/AuthProvider';
 import { extractTextFromPDF, parseResumeWithAI } from '@/utils/resumeParser';
+import { updateBrowseCache } from '@/app/browse/BrowseClient';
 import '@/styles/Profile.css';
 import '@/styles/Browse.css';
 
@@ -233,6 +234,9 @@ export default function EditProfile() {
     // Write to localStorage immediately — profile page reads this instantly
     const localData = { ...profileData, photoURL: photoFile ? photoPreview : photoURL };
     try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify(localData)); } catch {}
+
+    // Update browse cache instantly so Find shows the new card right away
+    updateBrowseCache(localData);
 
     // Bust auth provider cache so navbar updates
     try { localStorage.removeItem('ojo_profile_v1'); } catch {}
