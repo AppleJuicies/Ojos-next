@@ -211,12 +211,17 @@ export default function EditProfile() {
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-    const { error } = await supabase.from('users').upsert(saved);
+
+    const timeout = new Promise(resolve => setTimeout(() => resolve({ error: null, timedOut: true }), 5000));
+    const upsert  = supabase.from('users').upsert(saved).then(r => ({ ...r, timedOut: false }));
+    const { error, timedOut } = await Promise.race([upsert, timeout]);
+
     if (error) {
       setSaveError(error.message);
       setSaving(false);
       return;
     }
+    if (timedOut) console.warn('Upsert timed out — navigating anyway');
     setSaving(false);
     router.push(`/profile/${user.id}`);
   };

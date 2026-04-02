@@ -22,11 +22,16 @@ export default function ProfileClient({ uid }) {
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
-      if (!data) { router.push('/edit-profile'); return; }
-      setProfile(data);
-      setLoading(false);
-    });
+    let attempts = 0;
+    const fetch = () => {
+      supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
+        if (!data && attempts++ < 3) { setTimeout(fetch, 1500); return; }
+        if (!data) { router.push('/edit-profile'); return; }
+        setProfile(data);
+        setLoading(false);
+      });
+    };
+    fetch();
   }, [uid]); // eslint-disable-line
 
   const isOwnProfile = user !== undefined && user?.id === uid;
