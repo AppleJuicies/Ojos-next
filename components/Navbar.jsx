@@ -72,9 +72,7 @@ export default function Navbar() {
           <Link href="/sign-in" className="navbar__sign-in">Sign In</Link>
         )}
         {user && (
-          <form action="/api/sign-out" method="POST">
-            <button type="submit" className="navbar__sign-in">Sign Out</button>
-          </form>
+          <a href="/api/sign-out" className="navbar__sign-in">Sign Out</a>
         )}
       </div>
     </nav>
