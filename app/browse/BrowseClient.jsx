@@ -1,28 +1,53 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import '@/styles/Browse.css';
 
 const PAGE_SIZE = 50;
 
-function currentCompany(u) {
-  const exps = u.experiences;
-  if (!exps?.length) return u.company ? { name: u.company, current: true } : null;
-  const first = exps[0];
-  const isCurrent = first?.endDate?.toLowerCase() === 'present';
-  return first?.company ? { name: first.company, current: isCurrent } : (u.company ? { name: u.company, current: true } : null);
+function BrowseSkeleton() {
+  return (
+    <div className="browse__grid">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="browse-card browse-card--skeleton">
+          <div className="browse-card__header">
+            <div className="browse-card__avatar" style={{ background: '#eee' }} />
+            <div style={{ width: 120, height: 20, background: '#eee', borderRadius: 4 }} />
+          </div>
+          <div className="browse-card__body">
+            <div style={{ width: '80%', height: 14, background: '#eee', borderRadius: 4, marginBottom: 8 }} />
+            <div style={{ width: '60%', height: 14, background: '#eee', borderRadius: 4 }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-export default function BrowseClient({ initialUsers }) {
-  const [users,       setUsers]       = useState(initialUsers);
+export default function BrowseClient() {
+  const [users,       setUsers]       = useState([]);
+  const [loading,     setLoading]     = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore,     setHasMore]     = useState(initialUsers.length === PAGE_SIZE);
+  const [hasMore,     setHasMore]     = useState(false);
   const [search,      setSearch]      = useState('');
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase
+      .from('users')
+      .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
+      .order('name')
+      .limit(PAGE_SIZE)
+      .then(({ data }) => {
+        setUsers(data || []);
+        setHasMore((data || []).length === PAGE_SIZE);
+        setLoading(false);
+      });
+  }, []); // eslint-disable-line
 
   const loadMore = async () => {
     setLoadingMore(true);
-    const supabase = createClient();
     const last = users[users.length - 1];
     const { data } = await supabase
       .from('users')
@@ -41,6 +66,7 @@ export default function BrowseClient({ initialUsers }) {
     return (
       u.name?.toLowerCase().includes(q) ||
       u.headline?.toLowerCase().includes(q) ||
+      u.cardHeadline?.toLowerCase().includes(q) ||
       u.company?.toLowerCase().includes(q) ||
       u.bio?.toLowerCase().includes(q)
     );
@@ -61,7 +87,7 @@ export default function BrowseClient({ initialUsers }) {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? <BrowseSkeleton /> : filtered.length === 0 ? (
         <p className="browse-empty">No one found{search ? ` for "${search}"` : ''}.</p>
       ) : (
         <div className="browse__grid">
