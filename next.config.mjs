@@ -6,6 +6,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
   },
+  turbopack: {
+    resolveAlias: {
+      canvas: './empty-module.js',
+    },
+  },
   webpack: (config) => {
     config.resolve.alias.canvas = false;
     return config;
