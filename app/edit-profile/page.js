@@ -72,7 +72,7 @@ export default function EditProfile() {
   const [parsing,      setParsing]      = useState(false);
   const [parseError,   setParseError]   = useState('');
   const [saving,       setSaving]       = useState(false);
-  const [saved,        setSaved]        = useState(false);
+  const [saveError,    setSaveError]    = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting,     setDeleting]     = useState(false);
   const [form, setForm] = useState({
@@ -211,7 +211,12 @@ export default function EditProfile() {
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-    supabase.from('users').upsert(saved).catch(console.error);
+    const { error } = await supabase.from('users').upsert(saved);
+    if (error) {
+      setSaveError(error.message);
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     router.push(`/profile/${user.id}`);
   };
@@ -336,6 +341,7 @@ export default function EditProfile() {
         )}
 
         <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
+        {saveError && <p style={{ color: 'red', marginTop: 8 }}>{saveError}</p>}
       </form>
 
       <div className="danger-zone">
