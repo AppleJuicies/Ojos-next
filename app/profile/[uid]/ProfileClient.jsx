@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
@@ -9,8 +9,9 @@ import '@/styles/Profile.css';
 
 const ADMIN_UID = process.env.NEXT_PUBLIC_ADMIN_UID;
 
-export default function ProfileClient({ profile: initialProfile, uid }) {
-  const [profile,           setProfile]           = useState(initialProfile);
+export default function ProfileClient({ uid }) {
+  const [profile,           setProfile]           = useState(null);
+  const [loading,           setLoading]           = useState(true);
   const [parsing,           setParsing]           = useState(false);
   const [parseError,        setParseError]        = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -20,8 +21,18 @@ export default function ProfileClient({ profile: initialProfile, uid }) {
   const router  = useRouter();
   const supabase = createClient();
 
+  useEffect(() => {
+    supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
+      if (!data) { router.push('/edit-profile'); return; }
+      setProfile(data);
+      setLoading(false);
+    });
+  }, [uid]); // eslint-disable-line
+
   const isOwnProfile = user !== undefined && user?.id === uid;
   const isAdmin      = user?.id === ADMIN_UID && !isOwnProfile;
+
+  if (loading) return null;
 
   const handleParseClick = () => {
     const confirmed = window.confirm(
