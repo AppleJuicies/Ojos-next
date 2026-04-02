@@ -9,26 +9,48 @@ import '@/styles/Profile.css';
 const ADMIN_UID = process.env.NEXT_PUBLIC_ADMIN_UID;
 
 export default function ProfileClient({ uid }) {
-  const [profile, setProfile] = useState(undefined); // undefined = loading, null = not found
-  const user   = useAuth();
-  const router = useRouter();
+  const [profile, setProfile] = useState(undefined); // undefined = loading
+  const user     = useAuth();
+  const router   = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     if (!uid) return;
+
+    // Own profile: check localStorage first for instant display
+    const cachedKey = `ojos_profile_${uid}`;
+    try {
+      const cached = localStorage.getItem(cachedKey);
+      if (cached) {
+        setProfile(JSON.parse(cached));
+        // Still fetch from Supabase in background to get latest
+        supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
+          if (data) {
+            setProfile(data);
+            try { localStorage.setItem(cachedKey, JSON.stringify(data)); } catch {}
+          }
+        });
+        return;
+      }
+    } catch {}
+
+    // No cache — fetch from Supabase with retries
     let attempts = 0;
     const load = () => {
       supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
         if (!data && attempts++ < 4) { setTimeout(load, 1500); return; }
+        if (data) {
+          try { localStorage.setItem(cachedKey, JSON.stringify(data)); } catch {}
+        }
         setProfile(data ?? null);
       });
     };
     load();
   }, [uid]); // eslint-disable-line
 
-  // Only redirect to edit-profile after retries exhausted and it's the user's own profile
+  // Only redirect to edit-profile if it's truly the user's own profile with no data
   useEffect(() => {
-    if (profile === null && user && user.id === uid) {
+    if (profile === null && user?.id === uid) {
       router.push('/edit-profile');
     }
   }, [profile, user, uid]); // eslint-disable-line

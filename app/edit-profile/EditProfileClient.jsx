@@ -17,7 +17,11 @@ const FONTS = [
 
 function sortExpsByDate(exps) {
   return [...exps].sort((a, b) => {
-    const parse = s => { if (!s || s.toLowerCase() === 'present') return Infinity; const d = new Date(s); return isNaN(d.getTime()) ? 0 : d.getTime(); };
+    const parse = s => {
+      if (!s || s.toLowerCase() === 'present') return Infinity;
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
     const endDiff = parse(b.endDate) - parse(a.endDate);
     return endDiff !== 0 ? endDiff : parse(b.startDate) - parse(a.startDate);
   });
@@ -41,7 +45,7 @@ function CardPreview({ form, photoPreview, set }) {
           </div>
           <div className="browse-card__body">
             {form.cardHeadline && <p className="browse-card__headline">{form.cardHeadline}</p>}
-            {form.cardBio && <p className="browse-card__bio">{form.cardBio}</p>}
+            {form.cardBio      && <p className="browse-card__bio">{form.cardBio}</p>}
           </div>
         </div>
         <div className="card-preview__fields">
@@ -65,12 +69,11 @@ export default function EditProfile() {
   const supabase = createClient();
   const fileInputRef   = useRef(null);
   const resumeInputRef = useRef(null);
-  const [photoFile,    setPhotoFile]    = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
+
+  const [photoFile,    setPhotoFile]    = useState(null);  // compressed dataUrl of new photo
+  const [photoPreview, setPhotoPreview] = useState(null);  // what shows in the circle
   const [parsing,      setParsing]      = useState(false);
   const [parseError,   setParseError]   = useState('');
-  const [saving,       setSaving]       = useState(false);
-  const [saveError,    setSaveError]    = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting,     setDeleting]     = useState(false);
   const [form, setForm] = useState({
@@ -80,8 +83,31 @@ export default function EditProfile() {
     photoScale: 1, photoOffsetX: 0, photoOffsetY: 0,
   });
 
+  // Load profile — check localStorage first for instant display, then sync from Supabase
   useEffect(() => {
     if (!user) return;
+
+    // Try localStorage first
+    try {
+      const cached = localStorage.getItem(`ojos_profile_${user.id}`);
+      if (cached) {
+        const d = JSON.parse(cached);
+        if (d.photoURL) setPhotoPreview(d.photoURL);
+        setForm({
+          name: d.name || '', headline: d.headline || '', education: d.education || '',
+          bio: d.bio || '', cardHeadline: d.cardHeadline || '', cardBio: d.cardBio || '',
+          experiences: sortExpsByDate(d.experiences || []),
+          tags: Array.isArray(d.tags) ? d.tags.join(', ') : (d.tags || ''),
+          linkedinUrl: d.linkedinUrl || '', portfolioUrl: d.portfolioUrl || '',
+          is_free: d.is_free ?? true, hourly_rate: d.hourly_rate ?? '',
+          accentColor: d.accentColor || '#002fa7', nameFont: d.nameFont || 'Reddit Sans',
+          photoScale: d.photoScale ?? 1, photoOffsetX: d.photoOffsetX ?? 0, photoOffsetY: d.photoOffsetY ?? 0,
+        });
+        return; // skip Supabase fetch — data is fresh from last save
+      }
+    } catch {}
+
+    // No cache — fetch from Supabase
     supabase.from('users').select('*').eq('id', user.id).maybeSingle().then(({ data: d }) => {
       if (d) {
         if (d.photoURL) setPhotoPreview(d.photoURL);
@@ -102,22 +128,23 @@ export default function EditProfile() {
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
+  // Compress photo to 200px max, 0.5 quality — keeps file tiny
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
     img.onload = () => {
-      const maxSize = 400;
+      const maxSize = 200;
       const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
       const canvas = document.createElement('canvas');
       canvas.width  = Math.round(img.width  * scale);
       canvas.height = Math.round(img.height * scale);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
       URL.revokeObjectURL(objectUrl);
-      setPhotoFile(dataUrl); // saved for upload on save
-      setPhotoPreview(dataUrl); // instant local preview
+      setPhotoFile(dataUrl);
+      setPhotoPreview(dataUrl);
     };
     img.src = objectUrl;
   };
@@ -134,7 +161,9 @@ export default function EditProfile() {
         name:        data.name        || f.name,
         headline:    data.headline    || f.headline,
         bio:         data.bio         || f.bio,
-        experiences: data.experiences?.length ? data.experiences.map((exp, i) => ({ id: Date.now() + i, ...exp })) : f.experiences,
+        experiences: data.experiences?.length
+          ? data.experiences.map((exp, i) => ({ id: Date.now() + i, ...exp }))
+          : f.experiences,
       }));
     } catch (err) {
       setParseError('Could not parse resume. Please try again.');
@@ -165,6 +194,7 @@ export default function EditProfile() {
         supabase.from('users').delete().eq('id', user.id),
         supabase.storage.from('photos').remove([`${user.id}.jpg`]),
       ]);
+      try { localStorage.removeItem(`ojos_profile_${user.id}`); } catch {}
       await supabase.auth.signOut();
       router.push('/');
     } catch (err) {
@@ -174,26 +204,18 @@ export default function EditProfile() {
     }
   };
 
-  const save = async (e) => {
+  const save = (e) => {
     e.preventDefault();
     if (!user) return;
-    setSaving(true);
 
-    // Determine photo URL — if there's a new local file, get the storage URL now
-    // (upload happens fire-and-forget alongside the upsert)
-    let photoURL = photoPreview || user.user_metadata?.avatar_url || '';
-    if (photoFile) {
-      const path = `${user.id}.jpg`;
-      const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(path);
-      photoURL = publicUrl;
-      // Upload in background — don't block navigation
-      fetch(photoFile)
-        .then(r => r.blob())
-        .then(blob => supabase.storage.from('photos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' }))
-        .catch(err => console.error('Photo upload failed:', err));
-    }
+    // If new photo: get the CDN URL now (synchronous), upload in background
+    const photoPath = `${user.id}.jpg`;
+    const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(photoPath);
 
-    const saved = {
+    // photoURL: new file → use CDN URL for DB, local preview for instant display
+    const photoURL = photoFile ? publicUrl : (photoPreview || '');
+
+    const profileData = {
       id: user.id,
       name: form.name, headline: form.headline, education: form.education,
       bio: form.bio, cardHeadline: form.cardHeadline, cardBio: form.cardBio,
@@ -207,13 +229,30 @@ export default function EditProfile() {
       email: user.email,
       updated_at: new Date().toISOString(),
     };
-    try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
+
+    // Write to localStorage immediately — profile page reads this instantly
+    const localData = { ...profileData, photoURL: photoFile ? photoPreview : photoURL };
+    try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify(localData)); } catch {}
+
+    // Bust auth provider cache so navbar updates
+    try { localStorage.removeItem('ojo_profile_v1'); } catch {}
     bustProfileCache();
-    supabase.from('users').upsert(saved).then(({ error }) => {
-      if (error) console.error('Save error:', error.message);
-    });
-    setSaving(false);
+    try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
+
+    // Navigate instantly — don't wait for Supabase
     router.push(`/profile/${user.id}`);
+
+    // Sync to Supabase in background
+    const sync = async () => {
+      if (photoFile) {
+        const res  = await fetch(photoFile);
+        const blob = await res.blob();
+        await supabase.storage.from('photos').upload(photoPath, blob, { upsert: true, contentType: 'image/jpeg' });
+      }
+      const { error } = await supabase.from('users').upsert(profileData);
+      if (error) console.error('Save error:', error.message);
+    };
+    sync().catch(err => console.error('Background sync failed:', err));
   };
 
   if (!user) return <div className="page-loading">Loading…</div>;
@@ -231,13 +270,19 @@ export default function EditProfile() {
       </div>
 
       <form className="edit-profile__form" onSubmit={save}>
-        {/* ── Photo ── */}
+
         <div className="form__group">
           <span className="form__label">Profile Photo</span>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               <div className="form__photo-preview" onClick={() => fileInputRef.current.click()}
-                style={photoPreview ? { backgroundImage: `url(${photoPreview})`, backgroundSize: `${form.photoScale * 100}%`, backgroundPosition: `calc(50% + ${form.photoOffsetX}%) calc(50% + ${form.photoOffsetY}%)`, backgroundRepeat: 'no-repeat', backgroundColor: '#f0f0f0' } : {}}>
+                style={photoPreview ? {
+                  backgroundImage: `url(${photoPreview})`,
+                  backgroundSize: `${form.photoScale * 100}%`,
+                  backgroundPosition: `calc(50% + ${form.photoOffsetX}%) calc(50% + ${form.photoOffsetY}%)`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundColor: '#f0f0f0',
+                } : {}}>
                 {!photoPreview && <span>+</span>}
               </div>
               <p className="form__photo-hint">Click to upload</p>
@@ -245,9 +290,15 @@ export default function EditProfile() {
             <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
             {photoPreview && (
               <div className="photo-adjust">
-                <label className="photo-adjust__label">Zoom<input type="range" min="0.5" max="3" step="0.05" value={form.photoScale} onChange={e => set('photoScale', Number(e.target.value))} /></label>
-                <label className="photo-adjust__label">Left / Right<input type="range" min="-50" max="50" step="0.5" value={form.photoOffsetX} onChange={e => set('photoOffsetX', Number(e.target.value))} /></label>
-                <label className="photo-adjust__label">Up / Down<input type="range" min="-50" max="50" step="0.5" value={form.photoOffsetY} onChange={e => set('photoOffsetY', Number(e.target.value))} /></label>
+                <label className="photo-adjust__label">Zoom
+                  <input type="range" min="0.5" max="3" step="0.05" value={form.photoScale} onChange={e => set('photoScale', Number(e.target.value))} />
+                </label>
+                <label className="photo-adjust__label">Left / Right
+                  <input type="range" min="-50" max="50" step="0.5" value={form.photoOffsetX} onChange={e => set('photoOffsetX', Number(e.target.value))} />
+                </label>
+                <label className="photo-adjust__label">Up / Down
+                  <input type="range" min="-50" max="50" step="0.5" value={form.photoOffsetY} onChange={e => set('photoOffsetY', Number(e.target.value))} />
+                </label>
               </div>
             )}
           </div>
@@ -266,7 +317,8 @@ export default function EditProfile() {
             {SWATCHES.map(hex => (
               <button key={hex} type="button" className={`color-swatch${form.accentColor === hex ? ' active' : ''}`} style={{ background: hex }} onClick={() => set('accentColor', hex)} />
             ))}
-            <input type="color" value={form.accentColor} onChange={e => set('accentColor', e.target.value)} title="Custom colour" style={{ width: 32, height: 32, padding: 0, border: 'none', borderRadius: '50%', cursor: 'pointer', background: 'none' }} />
+            <input type="color" value={form.accentColor} onChange={e => set('accentColor', e.target.value)} title="Custom colour"
+              style={{ width: 32, height: 32, padding: 0, border: 'none', borderRadius: '50%', cursor: 'pointer', background: 'none' }} />
           </div>
         </div>
 
@@ -274,18 +326,31 @@ export default function EditProfile() {
           <span className="form__label">Personality</span>
           <div style={{ display: 'flex', gap: 12 }}>
             {FONTS.map(f => (
-              <button key={f.value} type="button" onClick={() => set('nameFont', f.value)} style={{ ...f.style, fontSize: '1.4rem', color: form.nameFont === f.value ? form.accentColor : 'var(--gray)', background: 'none', border: 'none', borderBottom: `2px solid ${form.nameFont === f.value ? form.accentColor : 'transparent'}`, paddingBottom: 2, cursor: 'pointer', transition: 'color 0.15s, border-color 0.15s' }}>
+              <button key={f.value} type="button" onClick={() => set('nameFont', f.value)}
+                style={{ ...f.style, fontSize: '1.4rem', color: form.nameFont === f.value ? form.accentColor : 'var(--gray)', background: 'none', border: 'none', borderBottom: `2px solid ${form.nameFont === f.value ? form.accentColor : 'transparent'}`, paddingBottom: 2, cursor: 'pointer', transition: 'color 0.15s, border-color 0.15s' }}>
                 {form.name || 'Your Name'}
               </button>
             ))}
           </div>
         </div>
 
-        <label>Headline<input placeholder="e.g. Hardware Engineer at Amazon" value={form.headline} onChange={e => set('headline', e.target.value)} maxLength={80} /><span className="input-hint input-hint--counter">{form.headline.length} / 80</span></label>
-        <label>Education<input placeholder="e.g. BS Mechanical Engineering · UCF · 2025" value={form.education} onChange={e => set('education', e.target.value)} maxLength={80} /><span className="input-hint input-hint--counter">{form.education.length} / 80</span></label>
-        <label>Bio<textarea rows={4} placeholder="A short introduction about yourself…" value={form.bio} onChange={e => set('bio', e.target.value)} /></label>
-        <label>LinkedIn URL<input type="url" placeholder="https://linkedin.com/in/yourname" value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} /></label>
-        <label>Portfolio / Website<input type="url" placeholder="https://yourportfolio.com" value={form.portfolioUrl} onChange={e => set('portfolioUrl', e.target.value)} /></label>
+        <label>Headline
+          <input placeholder="e.g. Hardware Engineer at Amazon" value={form.headline} onChange={e => set('headline', e.target.value)} maxLength={80} />
+          <span className="input-hint input-hint--counter">{form.headline.length} / 80</span>
+        </label>
+        <label>Education
+          <input placeholder="e.g. BS Mechanical Engineering · UCF · 2025" value={form.education} onChange={e => set('education', e.target.value)} maxLength={80} />
+          <span className="input-hint input-hint--counter">{form.education.length} / 80</span>
+        </label>
+        <label>Bio
+          <textarea rows={4} placeholder="A short introduction about yourself…" value={form.bio} onChange={e => set('bio', e.target.value)} />
+        </label>
+        <label>LinkedIn URL
+          <input type="url" placeholder="https://linkedin.com/in/yourname" value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} />
+        </label>
+        <label>Portfolio / Website
+          <input type="url" placeholder="https://yourportfolio.com" value={form.portfolioUrl} onChange={e => set('portfolioUrl', e.target.value)} />
+        </label>
 
         <div className="form__group">
           <span className="form__label">Experience</span>
@@ -320,7 +385,10 @@ export default function EditProfile() {
           <button type="button" className="exp-add-btn" onClick={addExp}>+ Add Experience</button>
         </div>
 
-        <label>Skills / Tags<input placeholder="e.g. Product Strategy, Growth, B2B SaaS" value={form.tags} onChange={e => set('tags', e.target.value)} /><span className="input-hint">Comma-separated</span></label>
+        <label>Skills / Tags
+          <input placeholder="e.g. Product Strategy, Growth, B2B SaaS" value={form.tags} onChange={e => set('tags', e.target.value)} />
+          <span className="input-hint">Comma-separated</span>
+        </label>
 
         <div className="edit-profile__rate-row">
           <span className="edit-profile__rate-label">Session type</span>
@@ -331,11 +399,12 @@ export default function EditProfile() {
         </div>
 
         {!form.is_free && (
-          <label>Hourly Rate (USD)<input type="number" min="1" placeholder="e.g. 150" value={form.hourly_rate} onChange={e => set('hourly_rate', e.target.value)} required /></label>
+          <label>Hourly Rate (USD)
+            <input type="number" min="1" placeholder="e.g. 150" value={form.hourly_rate} onChange={e => set('hourly_rate', e.target.value)} required />
+          </label>
         )}
 
-        {saveError && <p className="resume-import__error">{saveError}</p>}
-        <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
+        <button className="btn btn--primary" type="submit">Save Profile</button>
       </form>
 
       <div className="danger-zone">
