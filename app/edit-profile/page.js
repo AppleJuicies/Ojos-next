@@ -211,7 +211,8 @@ export default function EditProfile() {
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-    supabase.from('users').upsert(saved).catch(console.error);
+    await supabase.from('users').upsert(saved);
+    setSaving(false);
     router.push(`/profile/${user.id}`);
   };
 
