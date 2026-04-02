@@ -37,7 +37,7 @@ export default function ProfileClient({ uid }) {
   const isOwnProfile = user !== undefined && user?.id === uid;
   const isAdmin      = user?.id === ADMIN_UID && !isOwnProfile;
 
-  if (loading) return null;
+  if (loading) return <div className="page-loading">Loading…</div>;
 
   const handleParseClick = () => {
     const confirmed = window.confirm(
