@@ -211,17 +211,9 @@ export default function EditProfile() {
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-
-    const timeout = new Promise(resolve => setTimeout(() => resolve({ error: null, timedOut: true }), 5000));
-    const upsert  = supabase.from('users').upsert(saved).then(r => ({ ...r, timedOut: false }));
-    const { error, timedOut } = await Promise.race([upsert, timeout]);
-
-    if (error) {
-      setSaveError(error.message);
-      setSaving(false);
-      return;
-    }
-    if (timedOut) console.warn('Upsert timed out — navigating anyway');
+    supabase.from('users').upsert(saved).then(({ error }) => {
+      if (error) console.error('Save error:', error.message);
+    });
     setSaving(false);
     router.push(`/profile/${user.id}`);
   };
@@ -346,7 +338,6 @@ export default function EditProfile() {
         )}
 
         <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
-        {saveError && <p style={{ color: 'red', marginTop: 8 }}>{saveError}</p>}
       </form>
 
       <div className="danger-zone">

@@ -37,7 +37,17 @@ export default function ProfileClient({ uid }) {
   const isOwnProfile = user !== undefined && user?.id === uid;
   const isAdmin      = user?.id === ADMIN_UID && !isOwnProfile;
 
-  if (loading) return <div className="page-loading">Loading…</div>;
+  if (loading) return (
+    <main className="profile-page">
+      <header className="profile-header">
+        <div className="profile-photo"><div className="profile-photo__circle" style={{ background: '#eee' }} /></div>
+        <div className="profile-header__identity">
+          <div style={{ width: 200, height: 32, background: '#eee', borderRadius: 6, marginBottom: 8 }} />
+          <div style={{ width: 140, height: 18, background: '#eee', borderRadius: 6 }} />
+        </div>
+      </header>
+    </main>
+  );
 
   const handleParseClick = () => {
     const confirmed = window.confirm(
