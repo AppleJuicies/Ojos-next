@@ -109,13 +109,13 @@ export default function EditProfile() {
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
     img.onload = async () => {
-      const maxSize = 800;
+      const maxSize = 400;
       const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
       const canvas = document.createElement('canvas');
       canvas.width  = Math.round(img.width  * scale);
       canvas.height = Math.round(img.height * scale);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
       URL.revokeObjectURL(objectUrl);
       setPhotoFile(dataUrl);
       setPhotoPreview(dataUrl);
