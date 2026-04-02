@@ -16,15 +16,17 @@ export default function ProfileClient({ uid }) {
 
   useEffect(() => {
     if (!uid) return;
-    supabase
-      .from('users')
-      .select('*')
-      .eq('id', uid)
-      .maybeSingle()
-      .then(({ data }) => setProfile(data ?? null));
+    let attempts = 0;
+    const load = () => {
+      supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
+        if (!data && attempts++ < 4) { setTimeout(load, 1500); return; }
+        setProfile(data ?? null);
+      });
+    };
+    load();
   }, [uid]); // eslint-disable-line
 
-  // Redirect to edit-profile only if it's the user's own profile and it doesn't exist yet
+  // Only redirect to edit-profile after retries exhausted and it's the user's own profile
   useEffect(() => {
     if (profile === null && user && user.id === uid) {
       router.push('/edit-profile');

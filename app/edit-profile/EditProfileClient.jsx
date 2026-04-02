@@ -65,10 +65,8 @@ export default function EditProfile() {
   const supabase = createClient();
   const fileInputRef   = useRef(null);
   const resumeInputRef = useRef(null);
-  const [photoFile,      setPhotoFile]      = useState(null);
-  const [photoPreview,   setPhotoPreview]   = useState(null);
-  const [uploadedPhotoURL, setUploadedPhotoURL] = useState(null);
-  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoFile,    setPhotoFile]    = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [parsing,      setParsing]      = useState(false);
   const [parseError,   setParseError]   = useState('');
   const [saving,       setSaving]       = useState(false);
@@ -109,7 +107,7 @@ export default function EditProfile() {
     if (!file) return;
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
-    img.onload = async () => {
+    img.onload = () => {
       const maxSize = 400;
       const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
       const canvas = document.createElement('canvas');
@@ -118,22 +116,8 @@ export default function EditProfile() {
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
       URL.revokeObjectURL(objectUrl);
-      setPhotoFile(dataUrl);
-      setPhotoPreview(dataUrl);
-      // Set public URL immediately (getPublicUrl is synchronous), upload in background
-      const path = `${user.id}.jpg`;
-      const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(path);
-      setUploadedPhotoURL(publicUrl);
-      setPhotoUploading(true);
-      try {
-        const res  = await fetch(dataUrl);
-        const blob = await res.blob();
-        await supabase.storage.from('photos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
-      } catch (err) {
-        console.error('Photo upload failed:', err);
-      } finally {
-        setPhotoUploading(false);
-      }
+      setPhotoFile(dataUrl); // saved for upload on save
+      setPhotoPreview(dataUrl); // instant local preview
     };
     img.src = objectUrl;
   };
@@ -194,7 +178,21 @@ export default function EditProfile() {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    let photoURL = uploadedPhotoURL || photoPreview || user.user_metadata?.avatar_url || '';
+
+    // Determine photo URL — if there's a new local file, get the storage URL now
+    // (upload happens fire-and-forget alongside the upsert)
+    let photoURL = photoPreview || user.user_metadata?.avatar_url || '';
+    if (photoFile) {
+      const path = `${user.id}.jpg`;
+      const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(path);
+      photoURL = publicUrl;
+      // Upload in background — don't block navigation
+      fetch(photoFile)
+        .then(r => r.blob())
+        .then(blob => supabase.storage.from('photos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' }))
+        .catch(err => console.error('Photo upload failed:', err));
+    }
+
     const saved = {
       id: user.id,
       name: form.name, headline: form.headline, education: form.education,
@@ -205,18 +203,15 @@ export default function EditProfile() {
       is_free: form.is_free, hourly_rate: form.is_free ? null : Number(form.hourly_rate),
       accentColor: form.accentColor, nameFont: form.nameFont,
       photoScale: form.photoScale, photoOffsetX: form.photoOffsetX, photoOffsetY: form.photoOffsetY,
-      photoURL: photoURL || '',
+      photoURL,
       email: user.email,
       updated_at: new Date().toISOString(),
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-    const { error } = await supabase.from('users').upsert(saved);
-    if (error) {
-      setSaveError(error.message);
-      setSaving(false);
-      return;
-    }
+    supabase.from('users').upsert(saved).then(({ error }) => {
+      if (error) console.error('Save error:', error.message);
+    });
     setSaving(false);
     router.push(`/profile/${user.id}`);
   };
