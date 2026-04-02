@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server';
 import BrowseClient from './BrowseClient';
 
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Browse — OJOs' };
 
 // SSR: fetch first page of users on the server — zero loading spinner
