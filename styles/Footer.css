@@ -1,113 +1,133 @@
+/* ═══════════════════════════════════════
+   Footer — Microsoft 2000 / Win2k Style
+   (Win2k taskbar / status bar look)
+   ═══════════════════════════════════════ */
+
 .footer {
-  background: var(--blue);
-  color: rgba(255, 255, 255, 0.7);
-  padding: 48px 60px 36px;
+  background: #d4d0c8;
+  color: #000;
+  padding: 0;
   position: relative;
   z-index: 60;
+  /* Win2k status bar / taskbar top */
+  border-top: 2px solid #ffffff;
+  box-shadow: 0 -1px 0 #808080;
 }
 
 .footer__inner {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 40px;
+  gap: 32px;
   flex-wrap: wrap;
+  padding: 24px 40px 20px;
+  border-bottom: 1px solid #808080;
+  box-shadow: 0 1px 0 #ffffff;
 }
 
 .footer__brand {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .footer__wordmark {
-  font-family: 'Reddit Sans', var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  font-style: italic;
-  color: #fff;
-  letter-spacing: -0.01em;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  font-style: normal;
+  color: #003c7e;
+  letter-spacing: -0.02em;
+  text-shadow: 1px 1px 0 #aac5e8;
 }
 
 .footer__tagline {
-  font-size: 0.8rem;
-  letter-spacing: 0.16em;
-  text-transform: lowercase;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: #555;
+  font-family: 'Arial', sans-serif;
+  font-weight: 700;
 }
 
 .footer__links {
   display: flex;
-  gap: 48px;
+  gap: 40px;
   flex-wrap: wrap;
 }
 
 .footer__group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .footer__group-title {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-  font-weight: 600;
+  color: #333;
+  font-weight: 700;
+  font-family: 'Arial', sans-serif;
   margin-bottom: 2px;
+  border-left: 2px solid #003c7e;
+  padding-left: 6px;
 }
 
 .footer__link {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  transition: color 0.15s ease;
+  font-size: 0.8rem;
+  color: #003c7e;
+  text-decoration: underline;
+  font-family: 'Arial', sans-serif;
+  transition: none;
 }
 
 .footer__link:hover {
-  color: #fff;
+  color: #0000ff;
 }
 
 .footer__contact-email {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  transition: color 0.15s ease;
+  font-size: 0.8rem;
+  color: #003c7e;
+  text-decoration: underline;
+  font-family: 'Arial', sans-serif;
+  transition: none;
 }
 
 .footer__contact-email:hover {
-  color: #fff;
+  color: #0000ff;
 }
 
 .footer__bottom {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0;
+  padding: 6px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+  /* Win2k status bar */
+  background: #d4d0c8;
 }
 
 .footer__copy {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.68rem;
+  color: #444;
+  font-family: 'Arial', sans-serif;
+  font-weight: 700;
 }
 
 @media (max-width: 640px) {
-  .footer {
-    padding: 40px 24px 28px;
-  }
-
   .footer__inner {
     flex-direction: column;
-    gap: 32px;
+    gap: 24px;
+    padding: 20px 20px 16px;
   }
 
   .footer__bottom {
     flex-direction: column;
     align-items: flex-start;
+    padding: 6px 20px;
   }
 }
