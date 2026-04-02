@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
+import { usePathname } from 'next/navigation';
 import { useAuth, useProfile, usePendingCount } from '@/context/AuthProvider';
 import '@/styles/Navbar.css';
 
@@ -10,7 +9,6 @@ export default function Navbar() {
   const [scrolled, setScrolled]             = useState(false);
   const [sectionOpacity, setSectionOpacity] = useState(0);
   const pathname = usePathname();
-  const router   = useRouter();
   const isHome   = pathname === '/';
   const user         = useAuth();
   const pendingCount = usePendingCount();
@@ -28,14 +26,6 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const handleSignOut = async () => {
-    try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-    } catch {}
-    window.location.href = '/';
-  };
 
   return (
     <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
@@ -82,7 +72,9 @@ export default function Navbar() {
           <Link href="/sign-in" className="navbar__sign-in">Sign In</Link>
         )}
         {user && (
-          <button className="navbar__sign-in" onClick={handleSignOut}>Sign Out</button>
+          <form action="/api/sign-out" method="POST">
+            <button type="submit" className="navbar__sign-in">Sign Out</button>
+          </form>
         )}
       </div>
     </nav>
