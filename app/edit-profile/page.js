@@ -120,16 +120,15 @@ export default function EditProfile() {
       URL.revokeObjectURL(objectUrl);
       setPhotoFile(dataUrl);
       setPhotoPreview(dataUrl);
-      // Upload in background immediately
+      // Set public URL immediately (getPublicUrl is synchronous), upload in background
+      const path = `${user.id}.jpg`;
+      const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(path);
+      setUploadedPhotoURL(publicUrl);
       setPhotoUploading(true);
-      setUploadedPhotoURL(null);
       try {
         const res  = await fetch(dataUrl);
         const blob = await res.blob();
-        const path = `${user.id}.jpg`;
         await supabase.storage.from('photos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
-        const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(path);
-        setUploadedPhotoURL(publicUrl);
       } catch (err) {
         console.error('Photo upload failed:', err);
       } finally {
@@ -213,9 +212,7 @@ export default function EditProfile() {
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
     supabase.from('users').upsert(saved).catch(console.error);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    router.push(`/profile/${user.id}`);
   };
 
   if (user === undefined) return null;
@@ -337,7 +334,7 @@ export default function EditProfile() {
           <label>Hourly Rate (USD)<input type="number" min="1" placeholder="e.g. 150" value={form.hourly_rate} onChange={e => set('hourly_rate', e.target.value)} required /></label>
         )}
 
-        <button className="btn btn--primary" type="submit" disabled={saving || photoUploading}>{saving ? 'Saving…' : photoUploading ? 'Uploading photo…' : saved ? 'Saved!' : 'Save Profile'}</button>
+        <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
       </form>
 
       <div className="danger-zone">
