@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase-server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import ProfileClient from './ProfileClient';
 
 export async function generateMetadata({ params }) {
@@ -21,6 +21,8 @@ export default async function ProfilePage({ params }) {
     const { data } = await supabase.from('users').select('*').eq('id', params.uid).maybeSingle();
     profile = data;
   } catch {}
+
+  if (!profile) redirect('/edit-profile');
 
   return <ProfileClient profile={profile} uid={params.uid} />;
 }
