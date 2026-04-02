@@ -221,7 +221,7 @@ export default function EditProfile() {
     router.push(`/profile/${user.id}`);
   };
 
-  if (user === undefined) return null;
+  if (user === undefined) return <div className="page-loading">Loading…</div>;
   if (user === null) return <div className="page-loading">Please sign in.</div>;
 
   return (
