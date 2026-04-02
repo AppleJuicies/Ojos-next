@@ -1,0 +1,247 @@
+.browse {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 56px) 24px 80px;
+}
+
+.browse__hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.browse__overline {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: 0.5;
+  margin-bottom: 10px;
+}
+
+.browse__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--blue);
+  margin-bottom: 12px;
+}
+
+.browse__subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--gray);
+  font-size: 1rem;
+  margin-bottom: 28px;
+}
+
+.browse__search {
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 20px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.browse__search:focus {
+  border-color: var(--blue);
+}
+
+.browse__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Profile card */
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.profile-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 20px rgba(0, 47, 167, 0.08);
+  transform: translateY(-2px);
+}
+
+.profile-card__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-card__avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--blue-light);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.profile-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.profile-card__title {
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+.profile-card__bio {
+  font-size: 0.85rem;
+  color: var(--gray);
+  line-height: 1.55;
+}
+
+.profile-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.tag {
+  font-size: 0.72rem;
+  padding: 3px 9px;
+  background: var(--blue-light);
+  color: var(--blue);
+  border-radius: 100px;
+  font-weight: 500;
+}
+
+.profile-card__rate {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.profile-card__rate.free { color: #16a34a; }
+.profile-card__rate.paid { color: var(--blue); }
+
+.browse-loading,
+.browse-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40vh;
+  color: var(--gray);
+}
+
+/* ─── Browse card (updated field names) ─────────────── */
+.browse-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.browse-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 20px rgba(0, 47, 167, 0.08);
+  transform: translateY(-2px);
+}
+
+.browse-card__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.browse-card__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.browse-card__avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--white);
+}
+
+.browse-card__name {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.browse-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.browse-card__headline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+.browse-card__company {
+  font-size: 0.8rem;
+  color: var(--gray);
+  font-weight: 500;
+}
+
+.browse-card__bio {
+  font-size: 0.85rem;
+  color: var(--gray);
+  line-height: 1.55;
+  margin-top: 4px;
+}
+
+.browse__load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}

@@ -1,0 +1,308 @@
+.mdetail-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - var(--nav-height));
+  color: var(--gray);
+}
+
+.mdetail {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 48px) 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.mdetail__back {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--blue);
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.mdetail__back:hover {
+  opacity: 1;
+}
+
+/* ── Header ── */
+.mdetail__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 28px;
+  background: var(--white);
+  border: 1.5px solid var(--neutral-200);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.mdetail__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mdetail__avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.mdetail__header-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mdetail__name {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.mdetail__headline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.mdetail__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gray);
+  margin-top: 4px;
+}
+
+.mdetail__dot {
+  opacity: 0.4;
+}
+
+.mdetail__badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.mdetail__badge--pending   { background: #fef3c7; color: #b45309; }
+.mdetail__badge--confirmed { background: #dcfce7; color: #15803d; }
+.mdetail__badge--completed { background: var(--neutral-100); color: var(--gray); }
+.mdetail__badge--declined,
+.mdetail__badge--cancelled { background: #fee2e2; color: #b91c1c; }
+
+/* ── Sections ── */
+.mdetail__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 28px;
+  background: var(--white);
+  border: 1.5px solid var(--neutral-200);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.mdetail__name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* View Profile — subtle pill next to name */
+.mdetail__name-row .btn--ghost {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1.5px solid var(--neutral-200);
+  color: var(--gray);
+  letter-spacing: 0.02em;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.mdetail__name-row .btn--ghost:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-light);
+}
+
+
+
+.mdetail__section-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--neutral-200);
+}
+
+.mdetail__section-label-row .mdetail__section-label {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.mdetail__section-label {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: 0.6;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--neutral-200);
+}
+
+.mdetail__section-hint {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.mdetail__notes {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--black);
+  line-height: 1.65;
+}
+
+.mdetail__summary {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--neutral-200);
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--black);
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.mdetail__summary:focus {
+  border-color: var(--blue);
+}
+
+.mdetail__link-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.mdetail__link-btn,
+.mdetail__join-btn {
+  flex: 1;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 16px;
+  text-align: center;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.mdetail__link-btn {
+  border: 1.5px solid var(--blue);
+  background: transparent;
+  color: var(--blue);
+}
+
+.mdetail__link-btn:hover {
+  background: var(--blue-light);
+}
+
+.mdetail__join-btn {
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 47, 167, 0.18);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mdetail__join-btn:hover {
+  background: #0028a0;
+  box-shadow: 0 3px 10px rgba(0, 47, 167, 0.26);
+  transform: translateY(-1px);
+}
+
+.mdetail__link-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.mdetail__link-input input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  padding: 6px 12px;
+  border: 1.5px solid var(--neutral-200);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.mdetail__link-input input:focus {
+  border-color: var(--blue);
+}
+
+.mdetail__link-error {
+  font-size: 0.78rem;
+  color: #b91c1c;
+  width: 100%;
+}
+
+.mdetail__link-input-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mdetail__summary-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mdetail__summary-actions .btn--primary {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(0, 47, 167, 0.18);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.mdetail__summary-actions .btn--primary:hover:not(:disabled) {
+  background: #0028a0;
+  box-shadow: 0 3px 10px rgba(0, 47, 167, 0.26);
+  transform: translateY(-1px);
+}

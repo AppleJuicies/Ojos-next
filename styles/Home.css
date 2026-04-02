@@ -1,0 +1,1103 @@
+/* ─── Hero spacer (provides scroll height) ──────────── */
+.hero {
+  height: 100vh;
+}
+
+/* ─── Fixed hero overlay (stays on screen, JS drives everything) ── */
+.hero__overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* ─── Wordmark ──────────────────────────────────────── */
+.hero__wordmark {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  font-family: 'Reddit Sans', var(--font-body);
+  font-size: clamp(160px, 32vw, 600px);
+  line-height: 0.85;
+  letter-spacing: -0.01em;
+  color: var(--blue);
+  user-select: none;
+  z-index: 101;
+  will-change: transform;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Both O's: Bold Italic */
+.wordmark__o {
+  font-weight: 700;
+  font-style: italic;
+  display: inline-block;
+  transform-origin: center;
+}
+
+/* Eye pupils — commented out
+.wordmark__o {
+  position: relative;
+}
+
+.wordmark__o::after {
+  content: '';
+  position: absolute;
+  width: 0.17em;
+  height: 0.28em;
+  background: var(--blue);
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(12deg);
+  z-index: 1;
+}
+
+.wordmark__o::before {
+  content: '';
+  position: absolute;
+  width: 0.06em;
+  height: 0.10em;
+  background: var(--white);
+  border-radius: 50%;
+  left: calc(50% - 0.06em);
+  top: calc(50% - 0.08em);
+  transform: rotate(12deg);
+  z-index: 2;
+}
+*/
+
+/* J: regular weight, upright */
+.wordmark__j {
+  font-weight: 400;
+  font-style: normal;
+  display: inline-block;
+  transform-origin: center;
+}
+
+/* s: bold, upright */
+.wordmark__s {
+  font-weight: 700;
+  font-style: normal;
+  display: inline-block;
+  transform-origin: center;
+}
+
+/* ── Funnel scale: largest → smallest left to right ── */
+.wordmark__o:first-child       { transform: scale(1.20); margin-right: 0.08em; }
+.wordmark__j                   { transform: scale(1.11); margin-right: 0.02em; }
+.wordmark__o:not(:first-child) { transform: scale(1.0);  }
+.wordmark__s                   { transform: scale(0.90); margin-left: -0.03em; }
+
+/* ─── Tagline ───────────────────────────────────────── */
+.hero__tagline {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: 'Reddit Sans', var(--font-body);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(14px, 1.4vw, 22px);
+  letter-spacing: 0.22em;
+  color: var(--blue);
+  opacity: 0.6;
+  text-transform: lowercase;
+  z-index: 101;
+}
+
+/* ─── Scroll hint ───────────────────────────────────── */
+.hero__scroll-hint {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 101;
+}
+
+.hero__scroll-hint span {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: 0.4;
+}
+
+.hero__scroll-hint .scroll-line {
+  width: 1px;
+  height: 40px;
+  background: var(--blue);
+  opacity: 0.25;
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+/* ─── Nav bubbles ───────────────────────────────────── */
+.hero__bubbles {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 101;
+}
+
+.bubble {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  border: 1.5px solid color-mix(in srgb, var(--blue) 35%, transparent);
+  border-radius: 100px;
+  padding: 8px 24px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.bubble:hover {
+  background: var(--blue);
+  color: var(--white);
+  border-color: var(--blue);
+}
+
+.bubble--badge {
+  position: relative;
+}
+
+.bubble-badge {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  color: white;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bubble__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--blue);
+  opacity: 0.22;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* ─── Content sections ──────────────────────────────── */
+.section {
+  min-height: unset;
+  padding: 72px 60px;
+  background: var(--white);
+  position: relative;
+  z-index: 60;
+  border-top: 1px solid #0f0e12;
+}
+
+.section__overline {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: #0f0e12;
+  opacity: 0.38;
+  margin-bottom: 20px;
+}
+
+.section__title {
+  font-family: 'Reddit Sans', var(--font-body);
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 700;
+  font-style: italic;
+  color: #0f0e12;
+  margin-bottom: 48px;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+.section__body {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: #3a3a3a;
+  font-style: italic;
+}
+
+/* ─── How section — sticky split ───────────────────── */
+.section--how {
+  min-height: unset;
+  padding-bottom: 0;
+}
+
+.how__intro {
+  margin-bottom: 42px;
+}
+
+.how__scroll {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.how__steps {
+  display: flex;
+  flex-direction: column;
+  padding-top: 15vh;
+  padding-bottom: 38vh;
+}
+
+.how__step {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 40px 0;
+  padding-left: 20px;
+  border-bottom: 1px solid rgba(15,14,18,0.08);
+  border-left: 2px solid transparent;
+  opacity: 0.22;
+  transition: opacity 0.4s, border-color 0.4s;
+  cursor: default;
+  min-height: 21vh;
+}
+
+.how__step--active {
+  opacity: 1;
+}
+
+.step__number {
+  font-family: 'Reddit Sans', var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+  font-style: italic;
+  color: rgba(15,14,18,0.07);
+  opacity: 1;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 72px;
+  transition: color 0.4s;
+  letter-spacing: -0.04em;
+  margin-top: -4px;
+}
+
+.how__step--active .step__number {
+  /* color driven by inline style per step */
+}
+
+.how__step--active .step__label {
+  /* color driven by inline style per step */
+}
+
+.step__text {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #3a3a3a;
+}
+
+/* ─── Sticky visual wrap ────────────────────────────── */
+.how__visual-wrap {
+  position: sticky;
+  top: calc(var(--nav-height) + 48px);
+  height: calc(100vh - var(--nav-height) - 96px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.how__screen {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 560px;
+}
+
+/* ─── Per-step panel colors ─────────────────────────── */
+.sv--1 { border-top: 2px solid #002fa7; }
+.sv--2 { border-top: 2px solid #7c3aed; }
+.sv--3 { border-top: 2px solid #059669; }
+.sv--4 { border-top: 2px solid #d97706; }
+.sv--5 { border-top: 2px solid #c026d3; }
+.sv--6 { border-top: 2px solid #0891b2; }
+
+.sv--1.sv--active { box-shadow: 0 8px 60px rgba(0,47,167,0.22),  0 2px 16px rgba(0,0,0,0.06); }
+.sv--2.sv--active { box-shadow: 0 8px 60px rgba(124,58,237,0.22), 0 2px 16px rgba(0,0,0,0.06); }
+.sv--3.sv--active { box-shadow: 0 8px 60px rgba(5,150,105,0.22),  0 2px 16px rgba(0,0,0,0.06); }
+.sv--4.sv--active { box-shadow: 0 8px 60px rgba(217,119,6,0.22),  0 2px 16px rgba(0,0,0,0.06); }
+.sv--5.sv--active { box-shadow: 0 8px 60px rgba(192,38,211,0.22), 0 2px 16px rgba(0,0,0,0.06); }
+.sv--6.sv--active { box-shadow: 0 8px 60px rgba(8,145,178,0.22),  0 2px 16px rgba(0,0,0,0.06); }
+
+/* ─── Individual step visuals ───────────────────────── */
+.sv {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--white);
+  border: 1px solid rgba(15,14,18,0.12);
+  border-radius: 4px;
+  padding: 28px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.07);
+}
+
+.sv--active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.sv__confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+  border-radius: 4px;
+}
+
+.sv__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: 0.45;
+}
+
+/* ── Step 1: card preview ── */
+.sv__browse-card {
+  background: var(--neutral-50);
+  border: 1px solid rgba(15,14,18,0.1);
+  border-radius: 2px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sv__card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sv__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sv__avatar--lg {
+  width: 52px;
+  height: 52px;
+  font-size: 1.3rem;
+}
+
+.sv__card-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.sv__card-headline {
+  font-size: 0.78rem;
+  color: var(--gray);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.sv__card-bio {
+  font-size: 0.75rem;
+  color: var(--gray);
+  line-height: 1.55;
+}
+
+.sv__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.sv__control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sv__control-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray);
+  letter-spacing: 0.04em;
+}
+
+.sv__swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.sv__swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.sv__swatch--active {
+  opacity: 1;
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+/* ─── Animated cursor (Step 1) ───────────────────── */
+.sv__cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
+  z-index: 10;
+}
+
+.sv__cursor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.sv__cursor::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  animation: svCursorPing 1.6s ease-out infinite;
+}
+
+@keyframes svCursorPing {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ─── Step 2: staggered card fade-in ─────────────── */
+.sv--2.sv--active .sv__mini-card {
+  animation: svCardIn 0.45s ease both;
+}
+.sv--2.sv--active .sv__mini-card:nth-child(1) { animation-delay: 0.05s; }
+.sv--2.sv--active .sv__mini-card:nth-child(2) { animation-delay: 0.18s; }
+.sv--2.sv--active .sv__mini-card:nth-child(3) { animation-delay: 0.31s; }
+.sv--2.sv--active .sv__mini-card:nth-child(4) { animation-delay: 0.44s; }
+
+@keyframes svCardIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Inline typewriter cursor ────────────────────── */
+.sv__blink-cursor {
+  animation: svBlink 0.8s step-end infinite;
+  margin-left: 1px;
+  font-weight: 300;
+}
+
+/* ─── Step 4: pulse on Accept button ─────────────── */
+.sv--4.sv--active .sv__dash-btn--pulse {
+  animation: svAcceptPulse 2s ease-in-out infinite;
+}
+
+@keyframes svAcceptPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,47,167,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(0,47,167,0.22); }
+}
+
+/* ─── Step 5: avatar ping ─────────────────────────── */
+.sv--5.sv--active .sv__meet-avatar--ping {
+  animation: svAvatarPing 2.4s ease-in-out infinite;
+}
+
+@keyframes svAvatarPing {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  50%       { box-shadow: 0 4px 28px rgba(0,0,0,0.22), 0 0 0 6px rgba(255,255,255,0.15); }
+}
+
+
+@keyframes svBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.sv__font-pill {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border: 1px solid var(--neutral-200);
+  border-radius: 100px;
+  color: var(--gray);
+  background: var(--white);
+}
+
+/* ── Step 2: find page ── */
+.sv__search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(15,14,18,0.12);
+  border-radius: 2px;
+  font-size: 0.8rem;
+  color: var(--neutral-300);
+}
+
+.sv__search-icon {
+  font-size: 1rem;
+  color: var(--neutral-300);
+}
+
+.sv__mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+}
+
+.sv__mini-card {
+  background: var(--neutral-50);
+  border: 1px solid rgba(15,14,18,0.1);
+  border-radius: 2px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sv__mini-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: white;
+  margin-bottom: 2px;
+}
+
+.sv__mini-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.sv__mini-role {
+  font-size: 0.68rem;
+  color: var(--gray);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.sv__mini-about {
+  font-size: 0.64rem;
+  color: var(--gray);
+  line-height: 1.5;
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+/* ── Step 3: request ── */
+.sv__profile-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+.sv__profile-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+.sv__profile-role {
+  font-size: 0.78rem;
+  color: var(--gray);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.sv__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.sv__form-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sv__textarea {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--black);
+  background: var(--neutral-50);
+  border: 1px solid rgba(15,14,18,0.1);
+  border-radius: 2px;
+  padding: 12px;
+  flex: 1;
+}
+
+.sv__form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sv__form-pill {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border: 1px solid var(--neutral-200);
+  border-radius: 100px;
+  color: var(--gray);
+  font-family: var(--font-mono);
+}
+
+.sv__send-btn {
+  background: #0f0e12;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  padding: 10px;
+  border-radius: 2px;
+  text-align: center;
+}
+
+/* ── Step 4: accept ── */
+.sv__dash-card {
+  background: var(--neutral-50);
+  border: 1px solid rgba(15,14,18,0.1);
+  border-radius: 2px;
+  border-left: 2px solid #f59e0b;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-left-color 0.3s ease, background 0.3s ease;
+}
+
+.sv__dash-card--confirmed {
+  border-left-color: #16a34a;
+  background: #f0fdf4;
+}
+
+.sv__dash-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.sv__dash-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.sv__dash-date {
+  font-size: 0.7rem;
+  color: var(--gray);
+  font-family: var(--font-mono);
+}
+
+.sv__dash-time {
+  font-size: 0.72rem;
+  color: var(--gray);
+  font-family: var(--font-mono);
+}
+
+.sv__dash-note {
+  font-size: 0.75rem;
+  color: var(--gray);
+  font-style: italic;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sv__dash-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.sv__dash-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+.sv__dash-btn--primary {
+  background: var(--blue);
+  color: white;
+}
+
+.sv__dash-btn--ghost {
+  border: 1px solid var(--neutral-200);
+  color: var(--gray);
+}
+
+.sv__dash-confirmed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  animation: svConfirmedIn 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.sv__dash-check {
+  font-size: 0.95rem;
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.sv__dash-confirmed-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+@keyframes svConfirmedIn {
+  from { opacity: 0; transform: scale(0.8) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.sv__link-btn {
+  width: 100%;
+  border: 1.5px solid var(--blue);
+  border-radius: 14px;
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 14px;
+  text-align: center;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.sv__link-btn--active {
+  border-color: #16a34a;
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+/* ── Step 5: meeting ── */
+.sv__meet-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+.sv__meet-back {
+  font-size: 0.72rem;
+  color: var(--blue);
+  opacity: 0.6;
+}
+
+.sv__meet-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.sv__meet-room {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: var(--neutral-50);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.sv__meet-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: white;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.sv__meet-avatar--you {
+  outline: 2.5px solid white;
+  outline-offset: 2px;
+}
+
+.sv__meet-meta {
+  font-size: 0.72rem;
+  color: var(--gray);
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.sv__join-pill {
+  background: #0f0e12;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 400;
+  font-family: var(--font-mono);
+  padding: 12px;
+  border-radius: 2px;
+  text-align: center;
+}
+
+/* ── Step 6: connection summary ── */
+.sv__summary-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: 0.45;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--neutral-200);
+}
+
+.sv__summary-hint {
+  font-size: 0.75rem;
+  color: var(--gray);
+}
+
+.sv__summary-box {
+  flex: 1;
+  background: var(--neutral-50);
+  border: 1px solid rgba(15,14,18,0.1);
+  border-radius: 2px;
+  padding: 14px;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--black);
+}
+
+.sv__save-btn {
+  background: #0f0e12;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 400;
+  font-family: var(--font-mono);
+  padding: 7px 18px;
+  border-radius: 2px;
+  text-align: center;
+  align-self: flex-start;
+}
+
+/* ─── What section ──────────────────────────────────── */
+.section--what {
+  background: #ebebeb;
+}
+
+/* ─── About section ─────────────────────────────────── */
+.section--about {
+  background: #ebebeb;
+}
+
+.about__col-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px 60px;
+  margin-bottom: 10px;
+}
+
+.about__col-labels span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: #0f0e12;
+  opacity: 0.38;
+}
+
+.about__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px 60px;
+}
+
+.about__col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about__contact-email {
+  font-size: 0.875rem;
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 47, 167, 0.25);
+  padding-bottom: 1px;
+  align-self: flex-start;
+  transition: border-color 0.15s ease;
+}
+
+.about__contact-email:hover {
+  border-color: var(--blue);
+}
+
+/* ─── Step label ────────────────────────────────────── */
+.step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.step__label {
+  font-family: var(--font-body);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #3a3a3a;
+  letter-spacing: -0.01em;
+  transition: color 0.4s;
+  text-transform: lowercase;
+}
+
+/* ─── Value grid ────────────────────────────────────── */
+.value__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 0;
+  border-top: 1px solid rgba(15,14,18,0.14);
+}
+
+.value__card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 48px 40px 48px 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+}
+
+.value__card:first-child {
+  padding-right: 60px;
+  border-right: 1px solid rgba(15,14,18,0.14);
+}
+
+.value__card:last-child {
+  padding-left: 60px;
+  padding-right: 0;
+}
+
+.value__role {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: #0f0e12;
+  opacity: 0.38;
+}
+
+.value__headline {
+  font-family: 'Reddit Sans', var(--font-body);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 700;
+  font-style: italic;
+  color: #0f0e12;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.value__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid rgba(15,14,18,0.14);
+  padding-top: 24px;
+}
+
+.value__list li {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: #3a3a3a;
+  line-height: 1.55;
+  padding-left: 20px;
+  position: relative;
+}
+
+.value__list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: #0f0e12;
+  opacity: 0.25;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* ─── Animations ────────────────────────────────────── */
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.25; }
+  50%       { transform: scaleY(0.6); opacity: 0.1; }
+}

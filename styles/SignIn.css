@@ -1,0 +1,73 @@
+.sign-in {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--off-white);
+}
+
+.sign-in__card {
+  background: var(--white);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.sign-in__title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--blue);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.sign-in__subtitle {
+  font-size: 0.9rem;
+  color: var(--gray);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sign-in__google-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  background: var(--white);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--black);
+  cursor: pointer;
+  justify-content: center;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sign-in__google-btn:hover:not(:disabled) {
+  border-color: var(--blue);
+  box-shadow: 0 2px 8px rgba(0, 47, 167, 0.1);
+}
+
+.sign-in__google-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sign-in__error {
+  font-size: 0.85rem;
+  color: #dc2626;
+  text-align: center;
+}
