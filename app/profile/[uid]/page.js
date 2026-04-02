@@ -22,7 +22,5 @@ export default async function ProfilePage({ params }) {
     profile = data;
   } catch {}
 
-  if (!profile) notFound();
-
   return <ProfileClient profile={profile} uid={params.uid} />;
 }
