@@ -1,5 +1,6 @@
 import ProfileClient from './ProfileClient';
 
-export default function ProfilePage({ params }) {
-  return <ProfileClient uid={params.uid} />;
+export default async function ProfilePage({ params }) {
+  const { uid } = await params;
+  return <ProfileClient uid={uid} />;
 }
