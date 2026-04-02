@@ -72,6 +72,7 @@ export default function EditProfile() {
   const [parsing,      setParsing]      = useState(false);
   const [parseError,   setParseError]   = useState('');
   const [saving,       setSaving]       = useState(false);
+  const [saved,        setSaved]        = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting,     setDeleting]     = useState(false);
   const [form, setForm] = useState({
@@ -211,9 +212,10 @@ export default function EditProfile() {
     };
     try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
     bustProfileCache();
-    // Fire upsert and navigate simultaneously — profile SSR fetch will see the new data
     supabase.from('users').upsert(saved).catch(console.error);
-    router.push(`/profile/${user.id}`);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
   };
 
   if (user === undefined) return null;
@@ -335,7 +337,7 @@ export default function EditProfile() {
           <label>Hourly Rate (USD)<input type="number" min="1" placeholder="e.g. 150" value={form.hourly_rate} onChange={e => set('hourly_rate', e.target.value)} required /></label>
         )}
 
-        <button className="btn btn--primary" type="submit" disabled={saving || photoUploading}>{saving ? 'Saving…' : photoUploading ? 'Uploading photo…' : 'Save Profile'}</button>
+        <button className="btn btn--primary" type="submit" disabled={saving || photoUploading}>{saving ? 'Saving…' : photoUploading ? 'Uploading photo…' : saved ? 'Saved!' : 'Save Profile'}</button>
       </form>
 
       <div className="danger-zone">
