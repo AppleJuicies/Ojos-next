@@ -131,7 +131,7 @@ export default function ProfileClient({ uid }) {
         <div className="profile-actions">
           {isOwnProfile ? (
             <Link href="/edit-profile" className="bubble bubble--profile" style={{ color: accent, borderColor: accent }}>
-              Edit Profile
+              Develop
             </Link>
           ) : (
             <button
