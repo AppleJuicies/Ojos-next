@@ -212,8 +212,8 @@ export default function EditProfile() {
     const photoPath = `${user.id}.jpg`;
     const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(photoPath);
 
-    // photoURL: new file → use CDN URL for DB, local preview for instant display
-    const photoURL = photoFile ? publicUrl : (photoPreview || '');
+    // photoURL: new file → CDN URL; existing file → CDN URL (never base64 in DB)
+    const photoURL = photoFile ? publicUrl : (photoPreview?.startsWith('data:') ? publicUrl : (photoPreview || ''));
 
     const profileData = {
       id: user.id,
