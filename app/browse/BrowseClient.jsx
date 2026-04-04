@@ -34,18 +34,23 @@ export default function BrowseClient() {
   const supabase = createClient();
 
   useEffect(() => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
     supabase
       .from('users')
       .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
       .order('name')
       .limit(PAGE_SIZE)
+      .abortSignal(controller.signal)
       .then(({ data, error }) => {
+        clearTimeout(timer);
         if (error) console.error('Browse fetch error:', error.message);
         setUsers(data || []);
         setHasMore((data || []).length === PAGE_SIZE);
         setLoading(false);
       })
-      .catch(err => { console.error('Browse fetch failed:', err); setLoading(false); });
+      .catch(err => { clearTimeout(timer); console.error('Browse fetch failed:', err); setLoading(false); });
+    return () => { clearTimeout(timer); controller.abort(); };
   }, []); // eslint-disable-line
 
   const loadMore = async () => {

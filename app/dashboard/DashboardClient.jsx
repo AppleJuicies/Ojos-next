@@ -249,12 +249,12 @@ export default function Dashboard() {
   const uid      = user?.id;
   const supabase = createClient();
 
-  const fetchMeetings = useCallback(async () => {
+  const fetchMeetings = useCallback(async (signal) => {
     if (!uid) return;
     try {
       const [{ data: asHost }, { data: asRequester }] = await Promise.all([
-        supabase.from('meetings').select('*').eq('host_id',      uid),
-        supabase.from('meetings').select('*').eq('requester_id', uid),
+        supabase.from('meetings').select('*').eq('host_id',      uid).abortSignal(signal),
+        supabase.from('meetings').select('*').eq('requester_id', uid).abortSignal(signal),
       ]);
       const all = [
         ...(asHost      || []).map(m => ({ ...m, role: 'host'      })),
@@ -296,7 +296,10 @@ export default function Dashboard() {
     if (!uid) return;
     const cached = loadCache(uid);
     if (cached) { setMeetings(cached); setLoading(false); }
-    fetchMeetings();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    fetchMeetings(controller.signal).finally(() => clearTimeout(timer));
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [uid, fetchMeetings]);
 
   const respond = async (id, status, zoomUrl = '') => {
