@@ -1,73 +1,14 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase';
 import '@/styles/Browse.css';
 
 const PAGE_SIZE = 50;
 
-function BrowseSkeleton() {
-  return (
-    <div className="browse__grid">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="browse-card browse-card--skeleton">
-          <div className="browse-card__header">
-            <div className="browse-card__avatar" style={{ background: '#eee' }} />
-            <div style={{ width: 120, height: 20, background: '#eee', borderRadius: 4 }} />
-          </div>
-          <div className="browse-card__body">
-            <div style={{ width: '80%', height: 14, background: '#eee', borderRadius: 4, marginBottom: 8 }} />
-            <div style={{ width: '60%', height: 14, background: '#eee', borderRadius: 4 }} />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+export default function BrowseClient({ initialUsers = [] }) {
+  const [search, setSearch] = useState('');
 
-export default function BrowseClient() {
-  const [users,       setUsers]       = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore,     setHasMore]     = useState(false);
-  const [search,      setSearch]      = useState('');
-  const supabase = createClient();
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    supabase
-      .from('users')
-      .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
-      .order('name')
-      .limit(PAGE_SIZE)
-      .abortSignal(controller.signal)
-      .then(({ data, error }) => {
-        clearTimeout(timer);
-        if (error) console.error('Browse fetch error:', error.message);
-        setUsers(data || []);
-        setHasMore((data || []).length === PAGE_SIZE);
-        setLoading(false);
-      })
-      .catch(err => { clearTimeout(timer); console.error('Browse fetch failed:', err); setLoading(false); });
-    return () => { clearTimeout(timer); controller.abort(); };
-  }, []); // eslint-disable-line
-
-  const loadMore = async () => {
-    setLoadingMore(true);
-    const last = users[users.length - 1];
-    const { data } = await supabase
-      .from('users')
-      .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
-      .order('name')
-      .gt('name', last?.name || '')
-      .limit(PAGE_SIZE);
-    setUsers(prev => [...prev, ...(data || [])]);
-    setHasMore((data || []).length === PAGE_SIZE);
-    setLoadingMore(false);
-  };
-
-  const filtered = users.filter(u => {
+  const filtered = initialUsers.filter(u => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -94,7 +35,7 @@ export default function BrowseClient() {
         />
       </div>
 
-      {loading ? <BrowseSkeleton /> : filtered.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="browse-empty">No one found{search ? ` for "${search}"` : ''}.</p>
       ) : (
         <div className="browse__grid">
@@ -129,14 +70,6 @@ export default function BrowseClient() {
               </Link>
             );
           })}
-        </div>
-      )}
-
-      {!search && hasMore && (
-        <div className="browse__load-more">
-          <button className="btn btn--secondary" onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? 'Loading…' : 'Load more'}
-          </button>
         </div>
       )}
     </main>

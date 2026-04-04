@@ -1,8 +1,21 @@
-'use client';
-import dynamic from 'next/dynamic';
+import { createClient } from '@/lib/supabase-server';
+import BrowseClient from './BrowseClient';
 
-const BrowseClient = dynamic(() => import('./BrowseClient'), { ssr: false });
+export const revalidate = 120;
+export const metadata = { title: 'Find — OJOs' };
 
-export default function BrowsePage() {
-  return <BrowseClient />;
+export default async function BrowsePage() {
+  let users = [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('users')
+      .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
+      .order('name')
+      .limit(50);
+    users = data || [];
+  } catch (e) {
+    console.error('Browse SSR fetch failed:', e.message);
+  }
+  return <BrowseClient initialUsers={users} />;
 }

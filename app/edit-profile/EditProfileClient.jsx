@@ -245,7 +245,7 @@ export default function EditProfile() {
     // Navigate instantly — don't wait for Supabase
     router.push(`/profile/${user.id}`);
 
-    // Sync to Supabase in background
+    // Sync to Supabase in background, then rebuild Find page
     const sync = async () => {
       if (photoFile) {
         const res  = await fetch(photoFile);
@@ -253,7 +253,8 @@ export default function EditProfile() {
         await supabase.storage.from('photos').upload(photoPath, blob, { upsert: true, contentType: 'image/jpeg' });
       }
       const { error } = await supabase.from('users').upsert(profileData);
-      if (error) console.error('Save error:', error.message);
+      if (error) { console.error('Save error:', error.message); return; }
+      fetch('/api/revalidate-browse', { method: 'POST' }).catch(() => {});
     };
     sync().catch(err => console.error('Background sync failed:', err));
   };
