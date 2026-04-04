@@ -341,18 +341,17 @@ export default function Dashboard() {
             <Link href="/edit-profile" className="btn btn--primary btn--sm">Create Profile</Link>
           </div>
         )}
-        {loading
-          ? <p className="dash-empty-tab" style={{ opacity: 0.5 }}>Loading…</p>
-          : [{ id: 'present', label: 'Present' }, { id: 'future', label: 'Future' }, { id: 'past', label: 'Past' }].map(({ id, label }) => (
-            <div key={id} className="dash-section">
-              <p className="dash-section__label">{label}</p>
-              {tabMeetings[id].length === 0
+        {[{ id: 'present', label: 'Present' }, { id: 'future', label: 'Future' }, { id: 'past', label: 'Past' }].map(({ id, label }) => (
+          <div key={id} className="dash-section">
+            <p className="dash-section__label">{label}</p>
+            {loading
+              ? <div className="dash-skel dash-skel--row" />
+              : tabMeetings[id].length === 0
                 ? <p className="dash-empty-tab">No {label.toLowerCase()} meetings.</p>
                 : tabMeetings[id].map(m => <MeetingRow key={m.id} m={m} onRespond={respond} />)
-              }
-            </div>
-          ))
-        }
+            }
+          </div>
+        ))}
       </aside>
       <section className="dash-calendar-area">
         <Calendar meetings={meetings} selectedDay={selectedDay} onDaySelect={setSelectedDay} month={calMonth} onMonthChange={setCalMonth} />
