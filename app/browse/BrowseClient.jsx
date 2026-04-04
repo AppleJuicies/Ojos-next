@@ -69,19 +69,25 @@ export default function BrowseClient() {
       setLoading(false);
     }
 
+    // Safety timeout — never show skeleton forever
+    const timeout = setTimeout(() => setLoading(false), 8000);
+
     // Always refresh from Supabase in background
     supabase
       .from('users')
       .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
       .order('name')
       .limit(PAGE_SIZE)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { console.error('Browse fetch error:', error.message); setLoading(false); return; }
         const users = data || [];
         setUsers(users);
         setHasMore(users.length === PAGE_SIZE);
         setLoading(false);
         saveCache(users);
-      });
+      })
+      .catch(err => { console.error('Browse fetch failed:', err); setLoading(false); })
+      .finally(() => clearTimeout(timeout));
   }, []); // eslint-disable-line
 
   const loadMore = async () => {
