@@ -245,15 +245,19 @@ export default function EditProfile() {
     // Navigate instantly — don't wait for Supabase
     router.push(`/profile/${user.id}`);
 
-    // Sync to Supabase in background, then rebuild Find page
+    // Sync in background: upload photo (storage is fine client-side), then save profile via API
     const sync = async () => {
       if (photoFile) {
         const res  = await fetch(photoFile);
         const blob = await res.blob();
         await supabase.storage.from('photos').upload(photoPath, blob, { upsert: true, contentType: 'image/jpeg' });
       }
-      const { error } = await supabase.from('users').upsert(profileData);
-      if (error) { console.error('Save error:', error.message); return; }
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData),
+      });
+      if (!res.ok) { console.error('Save error:', await res.text()); return; }
       fetch('/api/revalidate-browse', { method: 'POST' }).catch(() => {});
     };
     sync().catch(err => console.error('Background sync failed:', err));
