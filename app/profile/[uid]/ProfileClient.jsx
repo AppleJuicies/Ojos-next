@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthProvider';
 import '@/styles/Profile.css';
 
@@ -10,49 +9,31 @@ const ADMIN_UID = process.env.NEXT_PUBLIC_ADMIN_UID;
 
 export default function ProfileClient({ uid }) {
   const [profile, setProfile] = useState(undefined); // undefined = loading
-  const user     = useAuth();
-  const router   = useRouter();
-  const supabase = createClient();
+  const user   = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (!uid) return;
 
-    // Own profile: check localStorage first for instant display
+    // Check localStorage first for instant display
     const cachedKey = `ojos_profile_${uid}`;
     try {
       const cached = localStorage.getItem(cachedKey);
-      if (cached) {
-        setProfile(JSON.parse(cached));
-        // Still fetch from Supabase in background to get latest
-        supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
-          if (data) {
-            setProfile(data);
-            try { localStorage.setItem(cachedKey, JSON.stringify(data)); } catch {}
-          }
-        });
-        return;
-      }
+      if (cached) setProfile(JSON.parse(cached));
     } catch {}
 
-    // No cache — fetch from Supabase with retries
-    let attempts = 0;
-    const load = () => {
-      supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
-        if (!data && attempts++ < 4) { setTimeout(load, 1500); return; }
-        if (data) {
-          try { localStorage.setItem(cachedKey, JSON.stringify(data)); } catch {}
-        }
+    // Always fetch fresh from API
+    fetch(`/api/profile/${uid}`)
+      .then(r => r.json())
+      .then(({ profile: data }) => {
         setProfile(data ?? null);
-      });
-    };
-    load();
-  }, [uid]); // eslint-disable-line
+        if (data) try { localStorage.setItem(cachedKey, JSON.stringify(data)); } catch {}
+      })
+      .catch(() => setProfile(prev => prev ?? null));
+  }, [uid]);
 
-  // Only redirect to edit-profile if it's truly the user's own profile with no data
   useEffect(() => {
-    if (profile === null && user?.id === uid) {
-      router.push('/edit-profile');
-    }
+    if (profile === null && user?.id === uid) router.push('/edit-profile');
   }, [profile, user, uid]); // eslint-disable-line
 
   if (profile === undefined) return (
@@ -83,6 +64,7 @@ export default function ProfileClient({ uid }) {
 
   const handleDeleteProfile = async () => {
     if (!window.confirm(`Permanently delete ${profile.name}'s profile? This cannot be undone.`)) return;
+    const supabase = (await import('@/lib/supabase')).createClient();
     await Promise.all([
       supabase.from('meetings').delete().eq('host_id', uid),
       supabase.from('meetings').delete().eq('requester_id', uid),
@@ -94,7 +76,6 @@ export default function ProfileClient({ uid }) {
 
   return (
     <main className="profile-page" style={{ '--profile-accent': accent }}>
-
       <header className="profile-header">
         <div className="profile-photo">
           <div className="profile-photo__circle">

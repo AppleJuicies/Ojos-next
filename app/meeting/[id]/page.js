@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthProvider';
 import '@/styles/MeetingDetail.css';
 
@@ -24,7 +23,6 @@ const STATUS_LABEL = { pending: 'Pending', confirmed: 'Confirmed', completed: 'C
 export default function MeetingDetail() {
   const { id: meetingId } = useParams();
   const user     = useAuth();
-  const supabase = createClient();
   const [meeting,    setMeeting]    = useState(null);
   const [profile,    setProfile]    = useState(null);
   const [summary,    setSummary]    = useState('');
@@ -36,32 +34,29 @@ export default function MeetingDetail() {
   const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
+    if (!meetingId) return;
     setLoading(true);
-    supabase.from('meetings').select('*').eq('id', meetingId).maybeSingle().then(({ data: m }) => {
-      if (!m) { setLoading(false); return; }
-      setMeeting(m);
-      setSummary(m.summary || '');
-      setLoading(false);
-      const otherId = user?.id === m.host_id ? m.requester_id : m.host_id;
-      if (otherId) {
-        supabase.from('users').select('*').eq('id', otherId).maybeSingle().then(({ data: p }) => {
-          if (p) setProfile(p);
-        });
-      }
-    });
-  }, [meetingId, user]); // eslint-disable-line
+    fetch(`/api/meeting/${meetingId}`)
+      .then(r => r.json())
+      .then(({ meeting: m, profile: p }) => {
+        if (m) { setMeeting(m); setSummary(m.summary || ''); }
+        if (p) setProfile(p);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [meetingId]);
 
   const saveLink = async () => {
     if (!linkUrl.startsWith('http')) return;
     setSavingLink(true);
-    await supabase.from('meetings').update({ zoom_join_url: linkUrl }).eq('id', meetingId);
+    await fetch(`/api/meeting/${meetingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ zoom_join_url: linkUrl }) });
     setMeeting(prev => ({ ...prev, zoom_join_url: linkUrl }));
     setLinking(false); setSavingLink(false);
   };
 
   const saveSummary = async () => {
     setSaving(true);
-    await supabase.from('meetings').update({ summary }).eq('id', meetingId);
+    await fetch(`/api/meeting/${meetingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ summary }) });
     setSaving(false); setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

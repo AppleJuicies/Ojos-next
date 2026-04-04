@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthProvider';
 import '@/styles/Profile.css';
 
@@ -11,16 +10,15 @@ export default function RequestMeeting() {
   const { uid }  = useParams();
   const user     = useAuth();
   const router   = useRouter();
-  const supabase = createClient();
   const [host,       setHost]       = useState(null);
   const [form,       setForm]       = useState({ date: '', time: '', duration: '30', notes: '' });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    supabase.from('users').select('*').eq('id', uid).maybeSingle().then(({ data }) => {
-      if (data) setHost(data);
-    });
-  }, [uid]); // eslint-disable-line
+    fetch(`/api/profile/${uid}`)
+      .then(r => r.json())
+      .then(({ profile }) => { if (profile) setHost(profile); });
+  }, [uid]);
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -29,6 +27,8 @@ export default function RequestMeeting() {
     if (!user || !host) return;
     setSubmitting(true);
     const scheduledAt = new Date(`${form.date}T${form.time}`).toISOString();
+    const { createClient } = await import('@/lib/supabase');
+    const supabase = createClient();
     await supabase.from('meetings').insert({
       requester_id:    user.id,
       requester_name:  user.user_metadata?.full_name || user.email,
