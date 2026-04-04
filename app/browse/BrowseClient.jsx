@@ -4,35 +4,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import '@/styles/Browse.css';
 
-const PAGE_SIZE  = 50;
-const CACHE_KEY  = 'ojos_browse_v2';
-const CACHE_TTL  = 5 * 60 * 1000; // 5 minutes
-
-function loadCache() {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
-    return Date.now() - ts < CACHE_TTL ? data : null;
-  } catch { return null; }
-}
-
-function saveCache(data) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
-}
-
-export function updateBrowseCache(updatedUser) {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
-    if (!raw) return;
-    const { data, ts } = JSON.parse(raw);
-    const exists = data.some(u => u.id === updatedUser.id);
-    const next = exists
-      ? data.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u)
-      : [...data, updatedUser];
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: next, ts }));
-  } catch {}
-}
+const PAGE_SIZE = 50;
 
 function BrowseSkeleton() {
   return (
@@ -62,32 +34,16 @@ export default function BrowseClient() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Show cached data immediately
-    const cached = loadCache();
-    if (cached) {
-      setUsers(cached);
-      setLoading(false);
-    }
-
-    // Safety timeout — never show skeleton forever
-    const timeout = setTimeout(() => setLoading(false), 8000);
-
-    // Always refresh from Supabase in background
     supabase
       .from('users')
       .select('id, name, headline, "cardHeadline", "cardBio", bio, "accentColor", "nameFont", "photoURL", "photoScale", "photoOffsetX", "photoOffsetY", experiences, company')
       .order('name')
       .limit(PAGE_SIZE)
-      .then(({ data, error }) => {
-        if (error) { console.error('Browse fetch error:', error.message); setLoading(false); return; }
-        const users = data || [];
-        setUsers(users);
-        setHasMore(users.length === PAGE_SIZE);
+      .then(({ data }) => {
+        setUsers(data || []);
+        setHasMore((data || []).length === PAGE_SIZE);
         setLoading(false);
-        saveCache(users);
-      })
-      .catch(err => { console.error('Browse fetch failed:', err); setLoading(false); })
-      .finally(() => clearTimeout(timeout));
+      });
   }, []); // eslint-disable-line
 
   const loadMore = async () => {
@@ -99,11 +55,9 @@ export default function BrowseClient() {
       .order('name')
       .gt('name', last?.name || '')
       .limit(PAGE_SIZE);
-    const next = [...users, ...(data || [])];
-    setUsers(next);
+    setUsers(prev => [...prev, ...(data || [])]);
     setHasMore((data || []).length === PAGE_SIZE);
     setLoadingMore(false);
-    saveCache(next);
   };
 
   const filtered = users.filter(u => {

@@ -296,8 +296,7 @@ export default function Dashboard() {
     if (!uid) return;
     const cached = loadCache(uid);
     if (cached) { setMeetings(cached); setLoading(false); }
-    const timeout = setTimeout(() => setLoading(false), 8000);
-    fetchMeetings().finally(() => clearTimeout(timeout));
+    fetchMeetings();
   }, [uid, fetchMeetings]);
 
   const respond = async (id, status, zoomUrl = '') => {
