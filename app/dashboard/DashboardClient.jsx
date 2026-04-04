@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
 import { useAuth, ProfileContext, RefreshPendingContext } from '@/context/AuthProvider';
 import '@/styles/Dashboard.css';
 
@@ -246,48 +245,19 @@ export default function Dashboard() {
   const [calMonth,    setCalMonth]    = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const uid      = user?.id;
-  const supabase = createClient();
+  const uid = user?.id;
 
   const fetchMeetings = useCallback(async (signal) => {
     if (!uid) return;
     try {
-      const [{ data: asHost }, { data: asRequester }] = await Promise.all([
-        supabase.from('meetings').select('*').eq('host_id',      uid).abortSignal(signal),
-        supabase.from('meetings').select('*').eq('requester_id', uid).abortSignal(signal),
-      ]);
-      const all = [
-        ...(asHost      || []).map(m => ({ ...m, role: 'host'      })),
-        ...(asRequester || []).map(m => ({ ...m, role: 'requester' })),
-      ].sort((a, b) => new Date(a.scheduled_at ?? 0) - new Date(b.scheduled_at ?? 0));
-
-      // Fetch names + accent colors for all other users in one query
-      const otherIds = [...new Set(all.map(m => m.role === 'host' ? m.requester_id : m.host_id).filter(Boolean))];
-      const hostIds  = [...new Set(all.filter(m => m.role === 'requester').map(m => m.host_id).filter(Boolean))];
-      const allIds   = [...new Set([...otherIds, ...hostIds])];
-
-      let profileMap = {};
-      if (allIds.length) {
-        const { data: profiles } = await supabase.from('users').select('id, name, "accentColor"').in('id', allIds);
-        (profiles || []).forEach(p => { profileMap[p.id] = p; });
-      }
-
-      const withData = all.map(m => {
-        const otherId = m.role === 'host' ? m.requester_id : m.host_id;
-        const p = profileMap[otherId] || {};
-        return {
-          ...m,
-          host_name:      profileMap[m.host_id]?.name      || m.host_id      || 'Unknown',
-          requester_name: profileMap[m.requester_id]?.name || m.requester_id || 'Unknown',
-          accentColor:    p.accentColor || STATUS_COLOR[m.status] || '#002fa7',
-        };
-      });
-
-      setMeetings(withData);
+      const res = await fetch('/api/meetings', { signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { meetings } = await res.json();
+      setMeetings(meetings);
       setLoading(false);
-      saveCache(uid, withData);
+      saveCache(uid, meetings);
     } catch (err) {
-      console.error('Dashboard fetch failed:', err);
+      if (err.name !== 'AbortError') console.error('Dashboard fetch failed:', err);
       setLoading(false);
     }
   }, [uid]); // eslint-disable-line
@@ -303,9 +273,9 @@ export default function Dashboard() {
   }, [uid, fetchMeetings]);
 
   const respond = async (id, status, zoomUrl = '') => {
-    const update = { status };
-    if (zoomUrl) update.zoom_join_url = zoomUrl;
-    await supabase.from('meetings').update(update).eq('id', id);
+    const body = { status };
+    if (zoomUrl) body.zoom_join_url = zoomUrl;
+    await fetch(`/api/meetings/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     try { sessionStorage.removeItem(cacheKey(uid)); } catch {}
     fetchMeetings();
     refreshPending();
