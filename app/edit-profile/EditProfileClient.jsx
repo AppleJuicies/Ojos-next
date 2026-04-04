@@ -107,23 +107,25 @@ export default function EditProfile() {
       }
     } catch {}
 
-    // No cache — fetch from Supabase
-    supabase.from('users').select('*').eq('id', user.id).maybeSingle().then(({ data: d }) => {
-      if (d) {
-        if (d.photoURL) setPhotoPreview(d.photoURL);
-        setForm({
-          name: d.name || '', headline: d.headline || '', education: d.education || '',
-          bio: d.bio || '', cardHeadline: d.cardHeadline || '', cardBio: d.cardBio || '',
-          experiences: sortExpsByDate(d.experiences || []),
-          tags: d.tags?.join(', ') || '', linkedinUrl: d.linkedinUrl || '', portfolioUrl: d.portfolioUrl || '',
-          is_free: d.is_free ?? true, hourly_rate: d.hourly_rate ?? '',
-          accentColor: d.accentColor || '#002fa7', nameFont: d.nameFont || 'Reddit Sans',
-          photoScale: d.photoScale ?? 1, photoOffsetX: d.photoOffsetX ?? 0, photoOffsetY: d.photoOffsetY ?? 0,
-        });
-      } else {
-        setForm(f => ({ ...f, name: user.user_metadata?.full_name || '' }));
-      }
-    });
+    // No cache — fetch via API
+    fetch(`/api/profile/${user.id}`)
+      .then(r => r.json())
+      .then(({ profile: d }) => {
+        if (d) {
+          if (d.photoURL) setPhotoPreview(d.photoURL);
+          setForm({
+            name: d.name || '', headline: d.headline || '', education: d.education || '',
+            bio: d.bio || '', cardHeadline: d.cardHeadline || '', cardBio: d.cardBio || '',
+            experiences: sortExpsByDate(d.experiences || []),
+            tags: d.tags?.join(', ') || '', linkedinUrl: d.linkedinUrl || '', portfolioUrl: d.portfolioUrl || '',
+            is_free: d.is_free ?? true, hourly_rate: d.hourly_rate ?? '',
+            accentColor: d.accentColor || '#002fa7', nameFont: d.nameFont || 'Reddit Sans',
+            photoScale: d.photoScale ?? 1, photoOffsetX: d.photoOffsetX ?? 0, photoOffsetY: d.photoOffsetY ?? 0,
+          });
+        } else {
+          setForm(f => ({ ...f, name: user.user_metadata?.full_name || '' }));
+        }
+      });
   }, [user]); // eslint-disable-line
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
@@ -208,13 +210,6 @@ export default function EditProfile() {
     e.preventDefault();
     if (!user) return;
 
-    // If new photo: get the CDN URL now (synchronous), upload in background
-    const photoPath = `${user.id}.jpg`;
-    const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(photoPath);
-
-    // photoURL: new file → CDN URL; existing file → CDN URL (never base64 in DB)
-    const photoURL = photoFile ? publicUrl : (photoPreview?.startsWith('data:') ? publicUrl : (photoPreview || ''));
-
     const profileData = {
       id: user.id,
       name: form.name, headline: form.headline, education: form.education,
@@ -225,42 +220,36 @@ export default function EditProfile() {
       is_free: form.is_free, hourly_rate: form.is_free ? null : Number(form.hourly_rate),
       accentColor: form.accentColor, nameFont: form.nameFont,
       photoScale: form.photoScale, photoOffsetX: form.photoOffsetX, photoOffsetY: form.photoOffsetY,
-      photoURL,
+      photoURL: photoFile ? '' : (photoPreview?.startsWith('data:') ? '' : (photoPreview || '')),
       email: user.email,
       updated_at: new Date().toISOString(),
     };
 
-    // Write to localStorage immediately — profile page reads this instantly
-    const localData = { ...profileData, photoURL: photoFile ? photoPreview : photoURL };
-    try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify(localData)); } catch {}
-
-    // Bust browse cache so Find fetches fresh data with new photo
-    try { sessionStorage.removeItem('ojos_browse_v2'); } catch {}
-
-    // Bust auth provider cache so navbar updates
+    // Write to localStorage immediately so profile page shows photo instantly
+    try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify({ ...profileData, photoURL: photoPreview || profileData.photoURL })); } catch {}
     try { localStorage.removeItem('ojo_profile_v1'); } catch {}
     bustProfileCache();
-    try { sessionStorage.removeItem('ojos_browse_v1'); } catch {}
 
-    // Navigate instantly — don't wait for Supabase
+    // Navigate instantly
     router.push(`/profile/${user.id}`);
 
-    // Sync in background: upload photo (storage is fine client-side), then save profile via API
-    const sync = async () => {
-      if (photoFile) {
-        const res  = await fetch(photoFile);
-        const blob = await res.blob();
-        await supabase.storage.from('photos').upload(photoPath, blob, { upsert: true, contentType: 'image/jpeg' });
-      }
-      const res = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileData),
-      });
+    // Send everything to the server — photo upload + DB save happen server-side
+    fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...profileData, _photoBase64: photoFile || null }),
+    }).then(async res => {
       if (!res.ok) { console.error('Save error:', await res.text()); return; }
+      const { photoURL } = await res.json();
+      // Update localStorage with the real CDN URL once the server confirms it
+      if (photoURL) {
+        try {
+          const stored = JSON.parse(localStorage.getItem(`ojos_profile_${user.id}`) || '{}');
+          localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify({ ...stored, photoURL }));
+        } catch {}
+      }
       fetch('/api/revalidate-browse', { method: 'POST' }).catch(() => {});
-    };
-    sync().catch(err => console.error('Background sync failed:', err));
+    }).catch(err => console.error('Background sync failed:', err));
   };
 
   if (!user) return <div className="page-loading">Loading…</div>;
