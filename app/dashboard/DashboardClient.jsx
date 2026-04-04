@@ -242,7 +242,7 @@ export default function Dashboard() {
   const refreshPending = useContext(RefreshPendingContext);
   const hasProfile     = contextProfile === undefined ? null : contextProfile !== null;
   const [meetings,    setMeetings]    = useState([]);
-  const [loading,     setLoading]     = useState(true);
+  const [loading,     setLoading]     = useState(false);
   const [calMonth,    setCalMonth]    = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [selectedDay, setSelectedDay] = useState(null);
 
@@ -295,7 +295,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!uid) return;
     const cached = loadCache(uid);
-    if (cached) { setMeetings(cached); setLoading(false); }
+    if (cached) { setMeetings(cached); } else { setLoading(true); }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
     fetchMeetings(controller.signal).finally(() => clearTimeout(timer));
@@ -330,7 +330,6 @@ export default function Dashboard() {
   }, [meetings, selectedDay]);
 
   if (user === null) return <div className="dash-empty"><p>Sign in to view your connections.</p></div>;
-  if (loading)       return <DashSkeleton />;
 
   return (
     <div className="dash-layout">
@@ -342,15 +341,18 @@ export default function Dashboard() {
             <Link href="/edit-profile" className="btn btn--primary btn--sm">Create Profile</Link>
           </div>
         )}
-        {[{ id: 'present', label: 'Present' }, { id: 'future', label: 'Future' }, { id: 'past', label: 'Past' }].map(({ id, label }) => (
-          <div key={id} className="dash-section">
-            <p className="dash-section__label">{label}</p>
-            {tabMeetings[id].length === 0
-              ? <p className="dash-empty-tab">No {label.toLowerCase()} meetings.</p>
-              : tabMeetings[id].map(m => <MeetingRow key={m.id} m={m} onRespond={respond} />)
-            }
-          </div>
-        ))}
+        {loading
+          ? <p className="dash-empty-tab" style={{ opacity: 0.5 }}>Loading…</p>
+          : [{ id: 'present', label: 'Present' }, { id: 'future', label: 'Future' }, { id: 'past', label: 'Past' }].map(({ id, label }) => (
+            <div key={id} className="dash-section">
+              <p className="dash-section__label">{label}</p>
+              {tabMeetings[id].length === 0
+                ? <p className="dash-empty-tab">No {label.toLowerCase()} meetings.</p>
+                : tabMeetings[id].map(m => <MeetingRow key={m.id} m={m} onRespond={respond} />)
+              }
+            </div>
+          ))
+        }
       </aside>
       <section className="dash-calendar-area">
         <Calendar meetings={meetings} selectedDay={selectedDay} onDaySelect={setSelectedDay} month={calMonth} onMonthChange={setCalMonth} />
