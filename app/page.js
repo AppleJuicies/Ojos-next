@@ -293,9 +293,19 @@ export default function Home() {
     const onMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
 
     const animate = () => {
-      const third = window.innerWidth / 3;
-      // Left third → both look left, middle third → up/down only, right third → both look right
-      const xZone = mouse.x < third ? -1 : mouse.x > third * 2 ? 1 : 0;
+      const nx = mouse.x / window.innerWidth; // 0–1 across screen
+
+      // Smoothstep factor: 0 in the middle third, eases to 1 at the edges
+      let xScale;
+      if (nx < 1 / 3) {
+        const t = 1 - nx * 3;                // 0 at boundary, 1 at far left
+        xScale = t * t * (3 - 2 * t);
+      } else if (nx > 2 / 3) {
+        const t = (nx - 2 / 3) * 3;          // 0 at boundary, 1 at far right
+        xScale = t * t * (3 - 2 * t);
+      } else {
+        xScale = 0;
+      }
 
       oRefs.current.forEach((o, i) => {
         const pupil = pupilRefs.current[i];
@@ -309,11 +319,13 @@ export default function Home() {
         const maxR  = rect.height * 0.13;
         const r     = Math.min(dist, maxR);
         const angle = Math.atan2(dy, dx);
-        let tx      = r * Math.cos(angle);
+        const rawTx = r * Math.cos(angle);
         const ty    = r * Math.sin(angle);
-        if      (xZone === 0)  tx = 0;                  // middle: no horizontal
-        else if (xZone === -1) tx = Math.min(tx, 0);    // left zone: clamp to left only
-        else                   tx = Math.max(tx, 0);    // right zone: clamp to right only
+        // Scale horizontal movement and preserve direction per zone
+        let tx;
+        if      (nx < 1 / 3) tx = Math.min(rawTx, 0) * xScale;
+        else if (nx > 2 / 3) tx = Math.max(rawTx, 0) * xScale;
+        else                  tx = 0;
         pupil.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
       });
       rafId = requestAnimationFrame(animate);
