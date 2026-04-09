@@ -305,7 +305,7 @@ export default function Home() {
     <main>
       <div className="hero" />
 
-      <h1 className="hero__wordmark" ref={wordmarkRef}>
+      <h1 className="hero__wordmark" ref={wordmarkRef} style={{ color: accent }}>
         <span className="wordmark__o">O</span>
         <span className="wordmark__j">J</span>
         <span className="wordmark__o">O</span>
@@ -317,14 +317,14 @@ export default function Home() {
       <div className="hero__bubbles" ref={bubblesRef}>
         {user ? (
           <>
-            <Link href="/browse"    className="bubble">Find</Link>
-            <div className="bubble__divider" />
-            <Link href="/dashboard" className="bubble bubble--badge">
+            <Link href="/browse"    className="bubble" style={{ color: accent, borderColor: accent }}>Find</Link>
+            <div className="bubble__divider" style={{ background: accent }} />
+            <Link href="/dashboard" className="bubble bubble--badge" style={{ color: accent, borderColor: accent }}>
               Connect
               {pendingCount > 0 && <span className="bubble-badge" style={{ background: accent }}>{pendingCount}</span>}
             </Link>
-            <div className="bubble__divider" />
-            <Link href={`/profile/${user.id}`} className="bubble">Reflect</Link>
+            <div className="bubble__divider" style={{ background: accent }} />
+            <Link href={`/profile/${user.id}`} className="bubble" style={{ color: accent, borderColor: accent }}>Reflect</Link>
           </>
         ) : (
           <Link href="/sign-in" className="bubble">Sign In</Link>
