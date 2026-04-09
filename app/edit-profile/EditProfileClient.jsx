@@ -282,9 +282,9 @@ export default function EditProfile() {
                 } : {}}>
                 {!photoPreview && <span>+</span>}
               </div>
-              <p className="form__photo-hint">Click to upload</p>
+              <p className="form__photo-hint">JPG, PNG, or WebP</p>
             </div>
-            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" style={{ display: 'none' }} onChange={handlePhotoChange} />
             {photoPreview && (
               <div className="photo-adjust">
                 <label className="photo-adjust__label">Zoom
