@@ -267,15 +267,13 @@ export default function EditProfile() {
         const { photoURL } = await res.json();
         if (photoURL) profileData.photoURL = photoURL;
       } else {
-        const errText = await res.text();
-        console.error('Save error:', errText);
-        setSaveError('Failed to save. Please try again.');
+        const errJson = await res.json().catch(() => ({ error: res.statusText }));
+        setSaveError(errJson.error || 'Failed to save. Please try again.');
         setSaving(false);
         return;
       }
     } catch (err) {
-      console.error('Save failed:', err);
-      setSaveError('Failed to save. Please try again.');
+      setSaveError(err.message || 'Failed to save. Please try again.');
       setSaving(false);
       return;
     }
