@@ -74,6 +74,7 @@ export default function EditProfile() {
   const [photoPreview, setPhotoPreview] = useState(null);  // what shows in the circle
   const [parsing,      setParsing]      = useState(false);
   const [parseError,   setParseError]   = useState('');
+  const [saving,       setSaving]       = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting,     setDeleting]     = useState(false);
   const [form, setForm] = useState({
@@ -215,9 +216,10 @@ export default function EditProfile() {
     }
   };
 
-  const save = (e) => {
+  const save = async (e) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || saving) return;
+    setSaving(true);
 
     const profileData = {
       id: user.id,
@@ -234,31 +236,28 @@ export default function EditProfile() {
       updated_at: new Date().toISOString(),
     };
 
-    // Write to localStorage immediately so profile page shows photo instantly
-    try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify({ ...profileData, photoURL: photoPreview || profileData.photoURL })); } catch {}
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...profileData, _photoBase64: photoFile || null }),
+      });
+      if (res.ok) {
+        const { photoURL } = await res.json();
+        if (photoURL) profileData.photoURL = photoURL;
+      } else {
+        console.error('Save error:', await res.text());
+      }
+    } catch (err) {
+      console.error('Save failed:', err);
+    }
+
+    // localStorage is now written with the real CDN URL before navigation
+    try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify(profileData)); } catch {}
     try { localStorage.removeItem('ojo_profile_v1'); } catch {}
     bustProfileCache();
-
-    // Navigate instantly
+    fetch('/api/revalidate-browse', { method: 'POST' }).catch(() => {});
     router.push(`/profile/${user.id}`);
-
-    // Send everything to the server — photo upload + DB save happen server-side
-    fetch('/api/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...profileData, _photoBase64: photoFile || null }),
-    }).then(async res => {
-      if (!res.ok) { console.error('Save error:', await res.text()); return; }
-      const { photoURL } = await res.json();
-      // Update localStorage with the real CDN URL once the server confirms it
-      if (photoURL) {
-        try {
-          const stored = JSON.parse(localStorage.getItem(`ojos_profile_${user.id}`) || '{}');
-          localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify({ ...stored, photoURL }));
-        } catch {}
-      }
-      fetch('/api/revalidate-browse', { method: 'POST' }).catch(() => {});
-    }).catch(err => console.error('Background sync failed:', err));
   };
 
   if (!user) return <div className="page-loading">Loading…</div>;
@@ -410,7 +409,7 @@ export default function EditProfile() {
           </label>
         )}
 
-        <button className="btn btn--primary" type="submit">Save Profile</button>
+        <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
       </form>
 
       <div className="danger-zone">
