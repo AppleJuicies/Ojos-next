@@ -103,7 +103,7 @@ export default function ProfileClient({ uid }) {
               <button className="admin-trash" onClick={handleDeleteProfile} title="Delete profile">🗑</button>
             )}
           </div>
-          {profile.headline  && <p className="profile-meta__headline">{profile.headline}</p>}
+          {profile.headline  && <p className="profile-meta__headline" style={{ fontFamily: `'${nameFont}', sans-serif` }}>{profile.headline}</p>}
           {profile.education && <p className="profile-meta__sub">{profile.education}</p>}
         </div>
       </header>
@@ -111,13 +111,13 @@ export default function ProfileClient({ uid }) {
       <div className="profile-body">
         <div className="profile-actions">
           {isOwnProfile ? (
-            <Link href="/edit-profile" className="bubble bubble--profile" style={{ color: accent, borderColor: accent }}>
+            <Link href="/edit-profile" className="bubble bubble--profile" style={{ color: accent, borderColor: accent, fontFamily: `'${nameFont}', sans-serif` }}>
               Develop
             </Link>
           ) : (
             <button
               className="bubble bubble--profile"
-              style={{ background: accent, borderColor: accent, color: '#fff' }}
+              style={{ background: accent, borderColor: accent, color: '#fff', fontFamily: `'${nameFont}', sans-serif` }}
               onClick={() => {
                 if (!user) { router.push('/sign-in'); return; }
                 router.push(`/request/${uid}`);
@@ -130,7 +130,7 @@ export default function ProfileClient({ uid }) {
 
         {profile.bio && (
           <>
-            <h2 className="profile-body__label" style={{ color: accent }}>About</h2>
+            <h2 className="profile-body__label" style={{ color: accent, fontFamily: `'${nameFont}', sans-serif` }}>About</h2>
             <p className="profile-body__text" style={{ fontFamily: `'${nameFont}', sans-serif` }}>{profile.bio}</p>
           </>
         )}
@@ -141,11 +141,11 @@ export default function ProfileClient({ uid }) {
 
         {(profile.linkedinUrl || profile.portfolioUrl) && (
           <>
-            <h2 className="profile-body__label" style={{ color: accent, marginTop: 32 }}>Media</h2>
+            <h2 className="profile-body__label" style={{ color: accent, marginTop: 32, fontFamily: `'${nameFont}', sans-serif` }}>Media</h2>
             <div className="profile-media">
               {profile.linkedinUrl && (
                 <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                  className="bubble bubble--profile" style={{ color: accent, borderColor: accent }}>
+                  className="bubble bubble--profile" style={{ color: accent, borderColor: accent, fontFamily: `'${nameFont}', sans-serif` }}>
                   LinkedIn ↗
                 </a>
               )}
@@ -154,7 +154,7 @@ export default function ProfileClient({ uid }) {
               )}
               {profile.portfolioUrl && (
                 <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer"
-                  className="bubble bubble--profile" style={{ color: accent, borderColor: accent }}>
+                  className="bubble bubble--profile" style={{ color: accent, borderColor: accent, fontFamily: `'${nameFont}', sans-serif` }}>
                   Portfolio ↗
                 </a>
               )}
@@ -164,7 +164,7 @@ export default function ProfileClient({ uid }) {
 
         {profile.experiences?.length > 0 && (
           <>
-            <h2 className="profile-body__label" style={{ color: accent, marginTop: 40 }}>Experience</h2>
+            <h2 className="profile-body__label" style={{ color: accent, marginTop: 40, fontFamily: `'${nameFont}', sans-serif` }}>Experience</h2>
             <div className="exp-list">
               {profile.experiences.map((exp, i) => (
                 <div key={exp.id || i} className="exp-entry">
@@ -172,13 +172,13 @@ export default function ProfileClient({ uid }) {
                     <div className="exp-entry__dot" style={{ background: accent }} />
                   </div>
                   <div className="exp-entry__right">
-                    <p className="exp-entry__title">{exp.title}</p>
-                    <p className="exp-entry__company">{exp.company}{exp.type ? ` · ${exp.type}` : ''}</p>
+                    <p className="exp-entry__title" style={{ fontFamily: `'${nameFont}', sans-serif` }}>{exp.title}</p>
+                    <p className="exp-entry__company" style={{ fontFamily: `'${nameFont}', sans-serif` }}>{exp.company}{exp.type ? ` · ${exp.type}` : ''}</p>
                     <p className="exp-entry__dates">
                       {exp.startDate}{exp.endDate ? ` – ${exp.endDate}` : ''}
                       {exp.location ? ` · ${exp.location}` : ''}
                     </p>
-                    {exp.description && <p className="exp-entry__desc">{exp.description}</p>}
+                    {exp.description && <p className="exp-entry__desc" style={{ fontFamily: `'${nameFont}', sans-serif` }}>{exp.description}</p>}
                   </div>
                 </div>
               ))}
