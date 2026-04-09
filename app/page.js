@@ -223,6 +223,8 @@ export default function Home() {
   const bubblesRef   = useRef(null);
   const scrollHintRef = useRef(null);
   const initialSize  = useRef(null);
+  const oRefs        = useRef([]);
+  const pupilRefs    = useRef([]);
   const [activeStep, setActiveStep] = useState(1);
   const stepRefs = useRef([]);
 
@@ -285,6 +287,40 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    let rafId;
+
+    const onMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
+
+    const animate = () => {
+      oRefs.current.forEach((o, i) => {
+        const pupil = pupilRefs.current[i];
+        if (!o || !pupil) return;
+        const rect = o.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top  + rect.height / 2;
+        const dx = mouse.x - cx;
+        const dy = mouse.y - cy;
+        const dist  = Math.sqrt(dx * dx + dy * dy);
+        const maxR  = rect.height * 0.13;
+        const r     = Math.min(dist, maxR);
+        const angle = Math.atan2(dy, dx);
+        const tx = r * Math.cos(angle);
+        const ty = r * Math.sin(angle);
+        pupil.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
+      });
+      rafId = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    rafId = requestAnimationFrame(animate);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => {
       const trigger = window.innerHeight * 0.42;
       const slop = 80;
@@ -306,9 +342,9 @@ export default function Home() {
       <div className="hero" />
 
       <h1 className="hero__wordmark" ref={wordmarkRef} style={{ color: accent }}>
-        <span className="wordmark__o">O</span>
+        <span className="wordmark__o" ref={el => oRefs.current[0] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[0] = el} /></span>
         <span className="wordmark__j">J</span>
-        <span className="wordmark__o">O</span>
+        <span className="wordmark__o" ref={el => oRefs.current[1] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[1] = el} /></span>
         <span className="wordmark__s">s</span>
       </h1>
 

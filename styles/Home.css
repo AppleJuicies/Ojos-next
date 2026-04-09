@@ -40,39 +40,22 @@
   font-style: italic;
   display: inline-block;
   transform-origin: center;
-}
-
-/* Eye pupils — commented out
-.wordmark__o {
   position: relative;
 }
 
-.wordmark__o::after {
-  content: '';
+/* Pupil — tracks the mouse cursor */
+.wordmark__pupil {
   position: absolute;
-  width: 0.17em;
-  height: 0.28em;
-  background: var(--blue);
-  border-radius: 50%;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) rotate(12deg);
-  z-index: 1;
-}
-
-.wordmark__o::before {
-  content: '';
-  position: absolute;
-  width: 0.06em;
-  height: 0.10em;
-  background: var(--white);
+  width: 0.13em;
+  height: 0.20em;
+  background: var(--ink);
   border-radius: 50%;
-  left: calc(50% - 0.06em);
-  top: calc(50% - 0.08em);
-  transform: rotate(12deg);
-  z-index: 2;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
 }
-*/
 
 /* J: regular weight, upright */
 .wordmark__j {
