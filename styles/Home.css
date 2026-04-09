@@ -50,7 +50,6 @@
   top: 50%;
   width: 0.13em;
   height: 0.20em;
-  background: var(--ink);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;

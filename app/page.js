@@ -301,12 +301,15 @@ export default function Home() {
         const cy = rect.top  + rect.height / 2;
         const dx = mouse.x - cx;
         const dy = mouse.y - cy;
-        const dist  = Math.sqrt(dx * dx + dy * dy);
-        const maxR  = rect.height * 0.13;
-        const r     = Math.min(dist, maxR);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const maxR = rect.height * 0.13;
+        const r    = Math.min(dist, maxR);
         const angle = Math.atan2(dy, dx);
-        const tx = r * Math.cos(angle);
+        let tx = r * Math.cos(angle);
         const ty = r * Math.sin(angle);
+        // Prevent cross-eyed look: left eye can't go right, right eye can't go left
+        if (i === 0) tx = Math.min(tx, 0);
+        if (i === 1) tx = Math.max(tx, 0);
         pupil.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
       });
       rafId = requestAnimationFrame(animate);
@@ -342,9 +345,9 @@ export default function Home() {
       <div className="hero" />
 
       <h1 className="hero__wordmark" ref={wordmarkRef} style={{ color: accent }}>
-        <span className="wordmark__o" ref={el => oRefs.current[0] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[0] = el} /></span>
+        <span className="wordmark__o" ref={el => oRefs.current[0] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[0] = el} style={{ background: accent }} /></span>
         <span className="wordmark__j">J</span>
-        <span className="wordmark__o" ref={el => oRefs.current[1] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[1] = el} /></span>
+        <span className="wordmark__o" ref={el => oRefs.current[1] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[1] = el} style={{ background: accent }} /></span>
         <span className="wordmark__s">s</span>
       </h1>
 
