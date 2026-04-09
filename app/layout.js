@@ -18,6 +18,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${redditSans.variable} ${fraunces.variable} ${dmMono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var a=localStorage.getItem('ojo_accent');if(a)document.documentElement.style.setProperty('--blue',a);}catch(e){}})();` }} />
+      </head>
       <body>
         <AuthProvider>
           <div className="page-layout">
