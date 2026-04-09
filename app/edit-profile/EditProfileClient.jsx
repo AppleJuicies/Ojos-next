@@ -72,9 +72,11 @@ export default function EditProfile() {
 
   const [photoFile,    setPhotoFile]    = useState(null);  // compressed dataUrl of new photo
   const [photoPreview, setPhotoPreview] = useState(null);  // what shows in the circle
+  const [converting,   setConverting]   = useState(false); // HEIC conversion in progress
   const [parsing,      setParsing]      = useState(false);
   const [parseError,   setParseError]   = useState('');
   const [saving,       setSaving]       = useState(false);
+  const [saveError,    setSaveError]    = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting,     setDeleting]     = useState(false);
   const [form, setForm] = useState({
@@ -134,31 +136,42 @@ export default function EditProfile() {
   const handlePhotoChange = async (e) => {
     let file = e.target.files[0];
     if (!file) return;
+    setConverting(true);
 
-    // Convert HEIC/HEIF (iPhone photos) to JPEG so the browser can decode it
-    const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
-      || /\.hei[cf]$/i.test(file.name);
-    if (isHeic) {
-      const heic2any = (await import('heic2any')).default;
-      const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
-      file = Array.isArray(blob) ? blob[0] : blob;
+    try {
+      // Convert HEIC/HEIF (iPhone photos) to JPEG so the browser can decode it
+      const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+        || /\.hei[cf]$/i.test(file.name);
+      if (isHeic) {
+        const heic2any = (await import('heic2any')).default;
+        const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+        file = Array.isArray(blob) ? blob[0] : blob;
+      }
+
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          const maxSize = 800;
+          const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.round(img.width  * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+          URL.revokeObjectURL(objectUrl);
+          setPhotoFile(dataUrl);
+          setPhotoPreview(dataUrl);
+          resolve();
+        };
+        img.onerror = reject;
+        img.src = objectUrl;
+      });
+    } catch (err) {
+      console.error('Photo processing failed:', err);
+    } finally {
+      setConverting(false);
     }
-
-    const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
-    img.onload = () => {
-      const maxSize = 800;
-      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width  = Math.round(img.width  * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      URL.revokeObjectURL(objectUrl);
-      setPhotoFile(dataUrl);
-      setPhotoPreview(dataUrl);
-    };
-    img.src = objectUrl;
   };
 
   const handleResumeUpload = async (e) => {
@@ -218,8 +231,16 @@ export default function EditProfile() {
 
   const save = async (e) => {
     e.preventDefault();
-    if (!user || saving) return;
+    if (!user || saving || converting) return;
     setSaving(true);
+    setSaveError('');
+
+    // Preserve existing CDN URL as fallback if upload fails
+    let existingPhotoURL = '';
+    try {
+      const cached = JSON.parse(localStorage.getItem(`ojos_profile_${user.id}`) || '{}');
+      if (cached.photoURL && !cached.photoURL.startsWith('data:')) existingPhotoURL = cached.photoURL;
+    } catch {}
 
     const profileData = {
       id: user.id,
@@ -231,7 +252,7 @@ export default function EditProfile() {
       is_free: form.is_free, hourly_rate: form.is_free ? null : Number(form.hourly_rate),
       accentColor: form.accentColor, nameFont: form.nameFont,
       photoScale: form.photoScale, photoOffsetX: form.photoOffsetX, photoOffsetY: form.photoOffsetY,
-      photoURL: photoFile ? '' : (photoPreview?.startsWith('data:') ? '' : (photoPreview || '')),
+      photoURL: existingPhotoURL,
       email: user.email,
       updated_at: new Date().toISOString(),
     };
@@ -246,13 +267,19 @@ export default function EditProfile() {
         const { photoURL } = await res.json();
         if (photoURL) profileData.photoURL = photoURL;
       } else {
-        console.error('Save error:', await res.text());
+        const errText = await res.text();
+        console.error('Save error:', errText);
+        setSaveError('Failed to save. Please try again.');
+        setSaving(false);
+        return;
       }
     } catch (err) {
       console.error('Save failed:', err);
+      setSaveError('Failed to save. Please try again.');
+      setSaving(false);
+      return;
     }
 
-    // localStorage is now written with the real CDN URL before navigation
     try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify(profileData)); } catch {}
     try { localStorage.removeItem('ojo_profile_v1'); } catch {}
     bustProfileCache();
@@ -409,7 +436,10 @@ export default function EditProfile() {
           </label>
         )}
 
-        <button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save Profile'}</button>
+        <button className="btn btn--primary" type="submit" disabled={saving || converting}>
+          {converting ? 'Processing photo…' : saving ? 'Saving…' : 'Save Profile'}
+        </button>
+        {saveError && <p style={{ color: 'red', marginTop: 8, fontSize: '0.9rem' }}>{saveError}</p>}
       </form>
 
       <div className="danger-zone">
