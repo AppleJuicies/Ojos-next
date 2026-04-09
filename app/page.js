@@ -293,6 +293,10 @@ export default function Home() {
     const onMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
 
     const animate = () => {
+      const third = window.innerWidth / 3;
+      // Left third → both look left, middle third → up/down only, right third → both look right
+      const xZone = mouse.x < third ? -1 : mouse.x > third * 2 ? 1 : 0;
+
       oRefs.current.forEach((o, i) => {
         const pupil = pupilRefs.current[i];
         if (!o || !pupil) return;
@@ -301,15 +305,15 @@ export default function Home() {
         const cy = rect.top  + rect.height / 2;
         const dx = mouse.x - cx;
         const dy = mouse.y - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const maxR = rect.height * 0.13;
-        const r    = Math.min(dist, maxR);
+        const dist  = Math.sqrt(dx * dx + dy * dy);
+        const maxR  = rect.height * 0.13;
+        const r     = Math.min(dist, maxR);
         const angle = Math.atan2(dy, dx);
-        let tx = r * Math.cos(angle);
-        const ty = r * Math.sin(angle);
-        // Prevent cross-eyed look: left eye can't go right, right eye can't go left
-        if (i === 0) tx = Math.min(tx, 0);
-        if (i === 1) tx = Math.max(tx, 0);
+        let tx      = r * Math.cos(angle);
+        const ty    = r * Math.sin(angle);
+        if      (xZone === 0)  tx = 0;                  // middle: no horizontal
+        else if (xZone === -1) tx = Math.min(tx, 0);    // left zone: clamp to left only
+        else                   tx = Math.max(tx, 0);    // right zone: clamp to right only
         pupil.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
       });
       rafId = requestAnimationFrame(animate);
