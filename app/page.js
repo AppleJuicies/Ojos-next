@@ -227,6 +227,7 @@ export default function Home() {
   const pupilRefs    = useRef([]);
   const repelRef     = useRef(null);
   const repelPos     = useRef({ x: 0, y: 0 });
+  const pupilPos     = useRef([{ x: 0, y: 0 }, { x: 0, y: 0 }]);
   const [activeStep, setActiveStep] = useState(1);
   const stepRefs = useRef([]);
 
@@ -319,17 +320,20 @@ export default function Home() {
         repel.style.transform = `translate(${repelPos.current.x.toFixed(2)}px, ${repelPos.current.y.toFixed(2)}px)`;
       }
 
+      const PUPIL_LERP = 0.06;
       oRefs.current.forEach((o, i) => {
         const pupil = pupilRefs.current[i];
         if (!o || !pupil) return;
         const rect  = o.getBoundingClientRect();
         const cy    = rect.top + rect.height / 2;
         const maxR  = rect.height * 0.13;
-        // Horizontal: screen-position driven (same for both eyes, no cross-eyed risk)
-        const tx = xFactor * maxR;
-        // Vertical: tracks cursor Y relative to each eye independently
-        const dy = mouse.y - cy;
-        const ty = Math.sign(dy) * Math.min(Math.abs(dy), maxR);
+        const targetX = xFactor * maxR;
+        const dy      = mouse.y - cy;
+        const targetY = Math.sign(dy) * Math.min(Math.abs(dy), maxR);
+        pupilPos.current[i].x += (targetX - pupilPos.current[i].x) * PUPIL_LERP;
+        pupilPos.current[i].y += (targetY - pupilPos.current[i].y) * PUPIL_LERP;
+        const tx = pupilPos.current[i].x.toFixed(2);
+        const ty = pupilPos.current[i].y.toFixed(2);
         pupil.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
       });
       rafId = requestAnimationFrame(animate);
