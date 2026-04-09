@@ -293,39 +293,25 @@ export default function Home() {
     const onMouseMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
 
     const animate = () => {
-      const nx = mouse.x / window.innerWidth; // 0–1 across screen
+      const nx = mouse.x / window.innerWidth; // 0→1 across screen
 
-      // Smoothstep factor: 0 in the middle third, eases to 1 at the edges
-      let xScale;
-      if (nx < 1 / 3) {
-        const t = 1 - nx * 3;                // 0 at boundary, 1 at far left
-        xScale = t * t * (3 - 2 * t);
-      } else if (nx > 2 / 3) {
-        const t = (nx - 2 / 3) * 3;          // 0 at boundary, 1 at far right
-        xScale = t * t * (3 - 2 * t);
-      } else {
-        xScale = 0;
-      }
+      // Continuous horizontal factor: -1 (far left) → 0 (center) → +1 (far right)
+      // Smoothstep on the absolute value gives a natural ease near center
+      const raw = (nx - 0.5) * 2;             // -1 to +1
+      const abs = Math.abs(raw);
+      const xFactor = Math.sign(raw) * abs * abs * (3 - 2 * abs);
 
       oRefs.current.forEach((o, i) => {
         const pupil = pupilRefs.current[i];
         if (!o || !pupil) return;
-        const rect = o.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top  + rect.height / 2;
-        const dx = mouse.x - cx;
-        const dy = mouse.y - cy;
-        const dist  = Math.sqrt(dx * dx + dy * dy);
+        const rect  = o.getBoundingClientRect();
+        const cy    = rect.top + rect.height / 2;
         const maxR  = rect.height * 0.13;
-        const r     = Math.min(dist, maxR);
-        const angle = Math.atan2(dy, dx);
-        const rawTx = r * Math.cos(angle);
-        const ty    = r * Math.sin(angle);
-        // Scale horizontal movement and preserve direction per zone
-        let tx;
-        if      (nx < 1 / 3) tx = Math.min(rawTx, 0) * xScale;
-        else if (nx > 2 / 3) tx = Math.max(rawTx, 0) * xScale;
-        else                  tx = 0;
+        // Horizontal: screen-position driven (same for both eyes, no cross-eyed risk)
+        const tx = xFactor * maxR;
+        // Vertical: tracks cursor Y relative to each eye independently
+        const dy = mouse.y - cy;
+        const ty = Math.sign(dy) * Math.min(Math.abs(dy), maxR);
         pupil.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
       });
       rafId = requestAnimationFrame(animate);
