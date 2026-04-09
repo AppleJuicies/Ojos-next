@@ -295,14 +295,8 @@ export default function Home() {
     const animate = () => {
       const nx = mouse.x / window.innerWidth; // 0→1 across screen
 
-      // Screen divided into fifths: 0–2/5 left, 2/5–3/5 middle, 3/5–1 right
-      // raw is 0 in the middle fifth, ramps to ±1 at the edges
-      let raw;
-      if      (nx < 0.4) raw = (nx - 0.4) / 0.4;  // -1 at far left, 0 at 2/5
-      else if (nx > 0.6) raw = (nx - 0.6) / 0.4;  //  0 at 3/5, +1 at far right
-      else               raw = 0;
-      const abs = Math.abs(raw);
-      const xFactor = Math.sign(raw) * abs * abs * (3 - 2 * abs);
+      // sin(π·(nx − 0.5)): inflection at center (0), ±1 at edges, smooth everywhere
+      const xFactor = Math.sin(Math.PI * (nx - 0.5));
 
       oRefs.current.forEach((o, i) => {
         const pupil = pupilRefs.current[i];
