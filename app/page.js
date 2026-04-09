@@ -225,8 +225,6 @@ export default function Home() {
   const initialSize  = useRef(null);
   const oRefs        = useRef([]);
   const pupilRefs    = useRef([]);
-  const repelRef     = useRef(null);
-  const repelPos     = useRef({ x: 0, y: 0 });
   const pupilPos     = useRef([{ x: 0, y: 0 }, { x: 0, y: 0 }]);
   const [activeStep, setActiveStep] = useState(1);
   const stepRefs = useRef([]);
@@ -301,25 +299,6 @@ export default function Home() {
       // sin(π·(nx − 0.5)): inflection at center (0), ±1 at edges, smooth everywhere
       const xFactor = Math.sin(Math.PI * (nx - 0.5));
 
-      // Wordmark repulsion — push the wrapper away from the cursor
-      const repel = repelRef.current;
-      if (repel) {
-        const rect  = repel.getBoundingClientRect();
-        const cx    = rect.left + rect.width  / 2;
-        const cy    = rect.top  + rect.height / 2;
-        const dx    = cx - mouse.x;
-        const dy    = cy - mouse.y;
-        const dist  = Math.sqrt(dx * dx + dy * dy) || 1;
-        const MAX   = 28;
-        const FALLOFF = 320;
-        const strength = MAX / (1 + dist / FALLOFF);
-        const targetX = (dx / dist) * strength;
-        const targetY = (dy / dist) * strength;
-        repelPos.current.x += (targetX - repelPos.current.x) * 0.03;
-        repelPos.current.y += (targetY - repelPos.current.y) * 0.03;
-        repel.style.transform = `translate(${repelPos.current.x.toFixed(2)}px, ${repelPos.current.y.toFixed(2)}px)`;
-      }
-
       const PUPIL_LERP = 0.06;
       oRefs.current.forEach((o, i) => {
         const pupil = pupilRefs.current[i];
@@ -368,7 +347,7 @@ export default function Home() {
     <main>
       <div className="hero" />
 
-      <div ref={repelRef} className="hero__wordmark-repel">
+      <div className="hero__wordmark-repel">
         <h1 className="hero__wordmark" ref={wordmarkRef} style={{ color: accent }}>
           <span className="wordmark__o" ref={el => oRefs.current[0] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[0] = el} style={{ background: accent }} /></span>
           <span className="wordmark__j">J</span>

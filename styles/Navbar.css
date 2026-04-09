@@ -35,6 +35,18 @@
 .navbar__logo .wordmark__o:not(:first-child) { transform: scale(1.0); }
 .navbar__logo .wordmark__s                   { transform: scale(0.90); margin-left: -0.03em; }
 
+.nav-pupil {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.13em;
+  height: 0.20em;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
+}
+
 .navbar__left {
   display: flex;
   align-items: center;
