@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { bustProfileCache, useAuth } from '@/context/AuthProvider';
+import { bustProfileCache, useAuth, useUpdateProfile } from '@/context/AuthProvider';
 import { extractTextFromPDF, parseResumeWithAI } from '@/utils/resumeParser';
 import '@/styles/Profile.css';
 import '@/styles/Browse.css';
@@ -64,9 +64,10 @@ function CardPreview({ form, photoPreview, set }) {
 }
 
 export default function EditProfile() {
-  const user     = useAuth();
-  const router   = useRouter();
-  const supabase = createClient();
+  const user          = useAuth();
+  const router        = useRouter();
+  const updateProfile = useUpdateProfile();
+  const supabase      = createClient();
   const fileInputRef   = useRef(null);
   const resumeInputRef = useRef(null);
 
@@ -279,8 +280,9 @@ export default function EditProfile() {
     }
 
     try { localStorage.setItem(`ojos_profile_${user.id}`, JSON.stringify(profileData)); } catch {}
-    try { localStorage.removeItem('ojo_profile_v1'); } catch {}
     bustProfileCache();
+    // Push new accent + font into context immediately — updates --blue, navbar, home page
+    updateProfile({ accentColor: form.accentColor, nameFont: form.nameFont, name: form.name });
     fetch('/api/revalidate-browse', { method: 'POST' }).catch(() => {});
     router.push(`/profile/${user.id}`);
   };

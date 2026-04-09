@@ -28,9 +28,10 @@ export function bustProfileCache() {
   try { localStorage.removeItem(PROFILE_KEY); } catch {}
 }
 
-export const AuthContext          = createContext(null);
-export const ProfileContext       = createContext(undefined);
-export const PendingCountContext  = createContext(0);
+export const AuthContext           = createContext(null);
+export const ProfileContext        = createContext(undefined);
+export const UpdateProfileContext  = createContext(() => {});
+export const PendingCountContext   = createContext(0);
 export const RefreshPendingContext = createContext(() => {});
 
 export default function AuthProvider({ children }) {
@@ -48,6 +49,17 @@ export default function AuthProvider({ children }) {
     const cached = localStorage.getItem(ACCENT_KEY);
     document.documentElement.style.setProperty('--blue', cached || DEFAULT_BLUE);
   }
+
+  const updateProfile = useCallback((updates) => {
+    setProfile(prev => {
+      const next = { ...prev, ...updates };
+      const accentColor = next.accentColor || DEFAULT_BLUE;
+      localStorage.setItem(ACCENT_KEY, accentColor);
+      document.documentElement.style.setProperty('--blue', accentColor);
+      saveProfileCache(next);
+      return next;
+    });
+  }, []);
 
   const fetchPendingCount = useCallback(async (uid) => {
     if (!uid) return;
@@ -151,16 +163,19 @@ export default function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={user}>
       <ProfileContext.Provider value={profile}>
-        <PendingCountContext.Provider value={pendingCount}>
-          <RefreshPendingContext.Provider value={refreshPending}>
-            {children}
-          </RefreshPendingContext.Provider>
-        </PendingCountContext.Provider>
+        <UpdateProfileContext.Provider value={updateProfile}>
+          <PendingCountContext.Provider value={pendingCount}>
+            <RefreshPendingContext.Provider value={refreshPending}>
+              {children}
+            </RefreshPendingContext.Provider>
+          </PendingCountContext.Provider>
+        </UpdateProfileContext.Provider>
       </ProfileContext.Provider>
     </AuthContext.Provider>
   );
 }
 
-export function useAuth()         { return useContext(AuthContext); }
-export function useProfile()      { return useContext(ProfileContext); }
-export function usePendingCount() { return useContext(PendingCountContext); }
+export function useAuth()          { return useContext(AuthContext); }
+export function useProfile()       { return useContext(ProfileContext); }
+export function useUpdateProfile() { return useContext(UpdateProfileContext); }
+export function usePendingCount()  { return useContext(PendingCountContext); }
