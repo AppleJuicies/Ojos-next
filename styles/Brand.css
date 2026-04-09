@@ -24,7 +24,7 @@
   font-family: var(--font-display);
   font-size: var(--text-4xl);
   font-weight: 700;
-  font-style: normal;
+  font-style: italic;
   color: var(--blue);
   letter-spacing: -0.02em;
 }
@@ -187,7 +187,7 @@
   user-select: none;
 }
 
-.wm-o  { font-weight: 700; font-style: normal; }
+.wm-o  { font-weight: 700; font-style: italic; }
 .wm-j  { font-weight: 400; font-style: normal; }
 .wm-s  { font-weight: 700; font-style: normal; }
 
@@ -220,8 +220,8 @@
 
 .brand__tagline-text {
   font-family: var(--font-display);
-  font-weight: 300;
-  font-style: normal;
+  font-weight: 400;
+  font-style: italic;
   font-size: var(--text-lg);
   letter-spacing: 0.22em;
   color: var(--blue);
