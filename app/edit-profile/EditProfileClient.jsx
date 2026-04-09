@@ -130,10 +130,19 @@ export default function EditProfile() {
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  // Compress photo to 200px max, 0.5 quality — keeps file tiny
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
+  const handlePhotoChange = async (e) => {
+    let file = e.target.files[0];
     if (!file) return;
+
+    // Convert HEIC/HEIF (iPhone photos) to JPEG so the browser can decode it
+    const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+      || /\.hei[cf]$/i.test(file.name);
+    if (isHeic) {
+      const heic2any = (await import('heic2any')).default;
+      const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+      file = Array.isArray(blob) ? blob[0] : blob;
+    }
+
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
     img.onload = () => {
@@ -282,9 +291,9 @@ export default function EditProfile() {
                 } : {}}>
                 {!photoPreview && <span>+</span>}
               </div>
-              <p className="form__photo-hint">JPG, PNG, or WebP</p>
+              <p className="form__photo-hint">Click to upload</p>
             </div>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" style={{ display: 'none' }} onChange={handlePhotoChange} />
+            <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif" style={{ display: 'none' }} onChange={handlePhotoChange} />
             {photoPreview && (
               <div className="photo-adjust">
                 <label className="photo-adjust__label">Zoom
