@@ -315,8 +315,8 @@ export default function Home() {
         const strength = MAX / (1 + dist / FALLOFF);
         const targetX = (dx / dist) * strength;
         const targetY = (dy / dist) * strength;
-        repelPos.current.x += (targetX - repelPos.current.x) * 0.07;
-        repelPos.current.y += (targetY - repelPos.current.y) * 0.07;
+        repelPos.current.x += (targetX - repelPos.current.x) * 0.03;
+        repelPos.current.y += (targetY - repelPos.current.y) * 0.03;
         repel.style.transform = `translate(${repelPos.current.x.toFixed(2)}px, ${repelPos.current.y.toFixed(2)}px)`;
       }
 
