@@ -126,7 +126,7 @@ export default function EditProfile() {
           setForm(f => ({ ...f, name: user.user_metadata?.full_name || '' }));
         }
       });
-  }, [user]); // eslint-disable-line
+  }, [user?.id]); // eslint-disable-line
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
