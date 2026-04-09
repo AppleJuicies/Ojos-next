@@ -25,10 +25,11 @@ const ACCENT_COLORS = [
   { name: '--dusk',  hex: '#8B95C9', label: 'Dusk',  note: 'Decorative, secondary' },
 ];
 const TYPE_SCALE = [
-  { label: 'Display XL',   spec: 'Reddit Sans  700i  48px  −0.02em', size: '48px', weight: 700, style: 'italic', font: 'Reddit Sans, sans-serif' },
-  { label: 'Display L',    spec: 'Reddit Sans  700i  36px  −0.01em', size: '36px', weight: 700, style: 'italic', font: 'Reddit Sans, sans-serif' },
-  { label: 'Display M',    spec: 'Reddit Sans  700   30px  −0.01em', size: '30px', weight: 700, style: 'normal', font: 'Reddit Sans, sans-serif' },
-  { label: 'Display S',    spec: 'Reddit Sans  400i  24px  +0.22em', size: '24px', weight: 400, style: 'italic', font: 'Reddit Sans, sans-serif', tracking: '0.22em' },
+  { label: 'Display XL',   spec: 'Unique  700  48px  −0.02em', size: '48px', weight: 700, style: 'normal', font: 'var(--font-unique), system-ui, sans-serif' },
+  { label: 'Display L',    spec: 'Unique  700  36px  −0.01em', size: '36px', weight: 700, style: 'normal', font: 'var(--font-unique), system-ui, sans-serif' },
+  { label: 'Display M',    spec: 'Unique  600  30px  −0.01em', size: '30px', weight: 600, style: 'normal', font: 'var(--font-unique), system-ui, sans-serif' },
+  { label: 'Display S',    spec: 'Unique  400  24px  +0.22em', size: '24px', weight: 400, style: 'normal', font: 'var(--font-unique), system-ui, sans-serif', tracking: '0.22em' },
+  { label: 'Display XS',   spec: 'Unique  300  18px  +0.08em', size: '18px', weight: 300, style: 'normal', font: 'var(--font-unique), system-ui, sans-serif', tracking: '0.08em' },
   { label: 'Editorial XL', spec: 'Fraunces  300i  36px  opsz:144',  size: '36px', weight: 300, style: 'italic', font: '"Fraunces", Georgia, serif', opsz: 144 },
   { label: 'Editorial M',  spec: 'Fraunces  400   24px  opsz:72',   size: '24px', weight: 400, style: 'normal', font: '"Fraunces", Georgia, serif', opsz: 72 },
   { label: 'Editorial S',  spec: 'Fraunces  300i  18px  opsz:9',    size: '18px', weight: 300, style: 'italic', font: '"Fraunces", Georgia, serif', opsz: 9 },
@@ -56,15 +57,15 @@ export default function Brand() {
           <div><div className="brand__wordmark-large"><span className="wm-o">O</span><span className="wm-j">J</span><span className="wm-o">O</span><span className="wm-s">s</span></div></div>
           <div><div className="brand__wordmark-small"><span className="wm-o">O</span><span className="wm-j">J</span><span className="wm-o">O</span><span className="wm-s">s</span></div></div>
           <div className="brand__wordmark-rules">
-            <div className="brand__wordmark-rule"><strong>O</strong> Reddit Sans 700 Italic</div>
-            <div className="brand__wordmark-rule"><strong>J</strong> Reddit Sans 400 Upright</div>
-            <div className="brand__wordmark-rule"><strong>O</strong> Reddit Sans 700 Italic</div>
-            <div className="brand__wordmark-rule"><strong>s</strong> Reddit Sans 700 Upright</div>
+            <div className="brand__wordmark-rule"><strong>O</strong> Unique 700 Upright</div>
+            <div className="brand__wordmark-rule"><strong>J</strong> Unique 400 Upright</div>
+            <div className="brand__wordmark-rule"><strong>O</strong> Unique 700 Upright</div>
+            <div className="brand__wordmark-rule"><strong>s</strong> Unique 700 Upright</div>
           </div>
         </div>
         <div className="brand__tagline-specimen">
           <p className="brand__tagline-text">see eye to eye</p>
-          <p className="brand__note">Reddit Sans 400 Italic — letter-spacing: 0.22em — lowercase</p>
+          <p className="brand__note">Unique 300 — letter-spacing: 0.22em — lowercase</p>
         </div>
       </section>
 
