@@ -27,11 +27,24 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const navLinks = user ? (
+    <>
+      <Link href="/browse"    className="navbar__link" style={{ color: accent }}>Find</Link>
+      <div className="navbar__divider" style={{ background: accent }} />
+      <Link href="/dashboard" className="navbar__link navbar__link--badge" style={{ color: accent }}>
+        Connect
+        {pendingCount > 0 && <span className="nav-badge" style={{ background: accent }}>{pendingCount}</span>}
+      </Link>
+      <div className="navbar__divider" style={{ background: accent }} />
+      <Link href={`/profile/${user.id}`} className="navbar__link" style={{ color: accent }}>Reflect</Link>
+    </>
+  ) : null;
+
   return (
     <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
       <div className="navbar__left">
         {!isHome && (
-          <Link href="/" className="navbar__logo">
+          <Link href="/" className="navbar__logo" style={{ color: accent }}>
             <span className="wordmark__o">O</span>
             <span className="wordmark__j">J</span>
             <span className="wordmark__o">O</span>
@@ -43,28 +56,10 @@ export default function Navbar() {
       <div className="navbar__center">
         {user && isHome && (
           <div className="navbar__sections" style={{ opacity: sectionOpacity, pointerEvents: sectionOpacity > 0.1 ? 'auto' : 'none' }}>
-            <Link href="/browse"    className="navbar__link">Find</Link>
-            <div className="navbar__divider" />
-            <Link href="/dashboard" className="navbar__link navbar__link--badge">
-              Connect
-              {pendingCount > 0 && <span className="nav-badge" style={{ background: accent }}>{pendingCount}</span>}
-            </Link>
-            <div className="navbar__divider" />
-            <Link href={`/profile/${user.id}`} className="navbar__link">Reflect</Link>
+            {navLinks}
           </div>
         )}
-        {user && !isHome && (
-          <>
-            <Link href="/browse"    className="navbar__link">Find</Link>
-            <div className="navbar__divider" />
-            <Link href="/dashboard" className="navbar__link navbar__link--badge">
-              Connect
-              {pendingCount > 0 && <span className="nav-badge" style={{ background: accent }}>{pendingCount}</span>}
-            </Link>
-            <div className="navbar__divider" />
-            <Link href={`/profile/${user.id}`} className="navbar__link">Reflect</Link>
-          </>
-        )}
+        {user && !isHome && navLinks}
       </div>
 
       <div className="navbar__right">
@@ -72,7 +67,7 @@ export default function Navbar() {
           <Link href="/sign-in" className="navbar__sign-in">Sign In</Link>
         )}
         {user && (
-          <a href="/api/sign-out" className="navbar__sign-in">Sign Out</a>
+          <a href="/api/sign-out" className="navbar__sign-in" style={{ color: accent, borderColor: accent }}>Sign Out</a>
         )}
       </div>
     </nav>
