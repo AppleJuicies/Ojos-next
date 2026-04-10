@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth, useProfile, usePendingCount } from '@/context/AuthProvider';
+import { useAuth, usePendingCount } from '@/context/AuthProvider';
 import '@/styles/Navbar.css';
 
 export default function Navbar() {
@@ -12,8 +12,6 @@ export default function Navbar() {
   const isHome   = pathname === '/';
   const user         = useAuth();
   const pendingCount = usePendingCount();
-  const profile      = useProfile();
-  const accent       = profile?.accentColor || '#002fa7';
 
   useEffect(() => {
     const onScroll = () => {
@@ -30,14 +28,14 @@ export default function Navbar() {
 
   const navLinks = user ? (
     <>
-      <Link href="/browse"    className="navbar__link" style={{ color: accent }}>Find</Link>
-      <div className="navbar__divider" style={{ background: accent }} />
-      <Link href="/dashboard" className="navbar__link navbar__link--badge" style={{ color: accent }}>
+      <Link href="/browse"    className="navbar__link">Find</Link>
+      <div className="navbar__divider" />
+      <Link href="/dashboard" className="navbar__link navbar__link--badge">
         Connect
-        {pendingCount > 0 && <span className="nav-badge" style={{ background: accent }}>{pendingCount}</span>}
+        {pendingCount > 0 && <span className="nav-badge">{pendingCount}</span>}
       </Link>
-      <div className="navbar__divider" style={{ background: accent }} />
-      <Link href={`/profile/${user.id}`} className="navbar__link" style={{ color: accent }}>Reflect</Link>
+      <div className="navbar__divider" />
+      <Link href={`/profile/${user.id}`} className="navbar__link">Reflect</Link>
     </>
   ) : null;
 
@@ -45,7 +43,7 @@ export default function Navbar() {
     <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
       <div className="navbar__left">
         {!isHome && (
-          <Link href="/" className="navbar__logo" style={{ color: accent }}>
+          <Link href="/" className="navbar__logo">
             <span className="wordmark__o">O</span>
             <span className="wordmark__j">J</span>
             <span className="wordmark__o">O</span>
@@ -68,7 +66,7 @@ export default function Navbar() {
           <Link href="/sign-in" className="navbar__sign-in">Sign In</Link>
         )}
         {user && (
-          <a href="/api/sign-out" className="navbar__sign-in" style={{ color: accent, borderColor: accent }}>Sign Out</a>
+          <a href="/api/sign-out" className="navbar__sign-in">Sign Out</a>
         )}
       </div>
     </nav>

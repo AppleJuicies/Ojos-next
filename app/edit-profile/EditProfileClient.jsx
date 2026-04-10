@@ -87,6 +87,13 @@ export default function EditProfile() {
     photoScale: 1, photoOffsetX: 0, photoOffsetY: 0,
   });
 
+  // Apply accent color site-wide in real-time as user picks swatches
+  useEffect(() => {
+    const color = form.accentColor || '#002fa7';
+    document.documentElement.style.setProperty('--blue', color);
+    try { localStorage.setItem('ojo_accent', color); } catch {}
+  }, [form.accentColor]);
+
   // Load profile — check localStorage first for instant display, then sync from Supabase
   useEffect(() => {
     if (!user) return;
