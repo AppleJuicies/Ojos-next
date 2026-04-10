@@ -361,14 +361,14 @@ export default function Home() {
       <div className="hero__bubbles" ref={bubblesRef}>
         {user ? (
           <>
-            <Link href="/browse"    className="bubble" style={{ color: accent, borderColor: accent }}>Find</Link>
-            <div className="bubble__divider" style={{ background: accent }} />
-            <Link href="/dashboard" className="bubble bubble--badge" style={{ color: accent, borderColor: accent }}>
+            <Link href="/browse"    className="bubble">Find</Link>
+            <div className="bubble__divider" />
+            <Link href="/dashboard" className="bubble bubble--badge">
               Connect
-              {pendingCount > 0 && <span className="bubble-badge" style={{ background: accent }}>{pendingCount}</span>}
+              {pendingCount > 0 && <span className="bubble-badge">{pendingCount}</span>}
             </Link>
-            <div className="bubble__divider" style={{ background: accent }} />
-            <Link href={`/profile/${user.id}`} className="bubble" style={{ color: accent, borderColor: accent }}>Reflect</Link>
+            <div className="bubble__divider" />
+            <Link href={`/profile/${user.id}`} className="bubble">Reflect</Link>
           </>
         ) : (
           <Link href="/sign-in" className="bubble">Sign In</Link>
