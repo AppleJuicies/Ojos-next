@@ -348,10 +348,10 @@ export default function Home() {
       <div className="hero" />
 
       <div className="hero__wordmark-repel">
-        <h1 className="hero__wordmark" ref={wordmarkRef} style={{ color: accent }}>
-          <span className="wordmark__o" ref={el => oRefs.current[0] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[0] = el} style={{ background: accent }} /></span>
+        <h1 className="hero__wordmark" ref={wordmarkRef}>
+          <span className="wordmark__o" ref={el => oRefs.current[0] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[0] = el} /></span>
           <span className="wordmark__j">J</span>
-          <span className="wordmark__o" ref={el => oRefs.current[1] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[1] = el} style={{ background: accent }} /></span>
+          <span className="wordmark__o" ref={el => oRefs.current[1] = el}>O<span className="wordmark__pupil" ref={el => pupilRefs.current[1] = el} /></span>
           <span className="wordmark__s">s</span>
         </h1>
       </div>
